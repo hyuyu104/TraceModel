@@ -66,7 +66,11 @@ def plot_trace(
 
 def plot_transition_matrix(transmat_):
     fig, (ax1, ax2) = plt.subplots(ncols=2, width_ratios=(4, 1), figsize=(5, 3))
-    labs = ["looped", "intermediate", "unlooped"]
+    nstates = len(transmat_)
+    if nstates == 2:
+        labs = ["looped", "unlooped"]
+    elif nstates == 3:
+        labs = ["looped", "intermediate", "unlooped"]
     sns.heatmap(
         transmat_, 
         square=True, 
@@ -76,7 +80,6 @@ def plot_transition_matrix(transmat_):
         annot=transmat_,
         ax=ax1
     )
-    nstates = len(transmat_)
     stationary_dist, prev = np.ones(nstates)/nstates, None
     while prev is None or np.linalg.norm(prev - stationary_dist) > 1e-4:
         prev = stationary_dist
@@ -91,3 +94,25 @@ def plot_transition_matrix(transmat_):
     )
     ax2.set_ylabel("Stationary distribution")
     return fig
+
+
+def ffill(
+        data:pd.DataFrame,
+        tracj_id_col:str,
+        time_col:str,
+        dist_col:str,
+        method:str="ffill",
+        limit:int=None
+) -> pd.DataFrame:
+    frame_df = data.set_index(time_col)
+    # make sure rows with no available distance are dropped
+    frame_df = frame_df.dropna(subset=[dist_col])
+    def func(df):
+        t_range = np.arange(np.ptp(df.index.values)+1)
+        t_range += np.min(df.index)
+        return df.reindex(t_range, method=method, limit=limit)
+    filled = frame_df.groupby(
+        tracj_id_col, 
+        sort=False
+    ).apply(func, include_groups=False).reset_index()
+    return filled

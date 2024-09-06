@@ -314,9 +314,7 @@ class TestDecoding(unittest.TestCase):
 
     def test_viterbi(self):
         val = self.tm.decode()
-        print(val)
         true_val = np.stack([log_viterbi(x, self.tm) for x in self.X])
-        print(true_val)
         self.assertAlmostEqual(np.mean(np.abs(val - true_val)), 0)
 
 if __name__ == "__main__":
