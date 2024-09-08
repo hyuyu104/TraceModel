@@ -72,13 +72,10 @@ class TraceModel:
                 args = self._dist_params[s]
                 vals.append(self._dist_type.pdf(x, **args))
         else:
-            vals = []
-            for s in state:
-                args = self._dist_params[s]
-                val = []
-                for b in x:
-                    val.append(self._dist_type.pdf(b, **args))
-                vals.append(val)
+            vals = np.stack([
+                self._dist_type.pdf(x, **self._dist_params[s])
+                for s in state
+            ])
         return np.where(np.isnan(vals), 1, vals)
     
     def _forward_(self, X:np.ndarray):

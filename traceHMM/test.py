@@ -105,7 +105,7 @@ class TestFittingTwoStates(unittest.TestCase):
 
     def test_forward_no_missing(self):
         self.tm._forward_(self.X)
-        val = self.tm.f
+        val = self.tm._f
         self.assertEqual(val.shape, (2, 7, 2))
 
         f = scaled_forward(self.X, self.tm)
@@ -118,7 +118,7 @@ class TestFittingTwoStates(unittest.TestCase):
         random_mask[[1,-1]] = 0
         X = np.where(random_mask==0, np.nan, self.X)
         self.tm._forward_(X)
-        val = self.tm.f
+        val = self.tm._f
         f = scaled_forward(X, self.tm)
         err = np.mean(np.abs(f - val))
         self.assertAlmostEqual(err, 0)
@@ -129,7 +129,7 @@ class TestFittingTwoStates(unittest.TestCase):
         random_mask[[1,-1]] = 0
         X = np.where(random_mask==0, np.nan, self.X)
         self.tm._forward_(X)
-        val = self.tm.f
+        val = self.tm._f
         f = scaled_forward(X, self.tm)
         err = np.mean(np.abs(f - val))
         self.assertAlmostEqual(err, 0)
@@ -140,14 +140,14 @@ class TestFittingTwoStates(unittest.TestCase):
         random_mask[[1,-1]] = 1
         X = np.where(random_mask==0, np.nan, self.X)
         self.tm._forward_(X)
-        val = self.tm.f
+        val = self.tm._f
         f = scaled_forward(X, self.tm)
         err = np.mean(np.abs(f - val))
         self.assertAlmostEqual(err, 0)
 
     def test_backward_no_missing(self):
         self.tm._backward_(self.X)
-        val = self.tm.b
+        val = self.tm._b
         self.assertEqual(val.shape, (2, 7, 2))
 
         b = scaled_backward(self.X, self.tm)
@@ -160,7 +160,7 @@ class TestFittingTwoStates(unittest.TestCase):
         random_mask[[1,-1]] = 0
         X = np.where(random_mask==0, np.nan, self.X)
         self.tm._backward_(X)
-        val = self.tm.b
+        val = self.tm._b
         b = scaled_backward(X, self.tm)
         err = np.mean(np.abs(b - val))
         self.assertAlmostEqual(err, 0)
@@ -171,7 +171,7 @@ class TestFittingTwoStates(unittest.TestCase):
         random_mask[[1,-1]] = 0
         X = np.where(random_mask==0, np.nan, self.X)
         self.tm._backward_(X)
-        val = self.tm.b
+        val = self.tm._b
         b = scaled_backward(X, self.tm)
         err = np.mean(np.abs(b - val))
         self.assertAlmostEqual(err, 0)
@@ -182,7 +182,7 @@ class TestFittingTwoStates(unittest.TestCase):
         random_mask[[1,-1]] = 1
         X = np.where(random_mask==0, np.nan, self.X)
         self.tm._backward_(X)
-        val = self.tm.b
+        val = self.tm._b
         b = scaled_backward(X, self.tm)
         err = np.mean(np.abs(b - val))
         self.assertAlmostEqual(err, 0)
@@ -209,7 +209,7 @@ class TestFittingThreeStates(unittest.TestCase):
 
     def test_forward_no_missing(self):
         self.tm._forward_(self.X)
-        val = self.tm.f
+        val = self.tm._f
         self.assertEqual(val.shape, (2, 7, 3))
 
         f = scaled_forward(self.X, self.tm)
@@ -222,7 +222,7 @@ class TestFittingThreeStates(unittest.TestCase):
         random_mask[[1,-1]] = 0
         X = np.where(random_mask==0, np.nan, self.X)
         self.tm._forward_(X)
-        val = self.tm.f
+        val = self.tm._f
         f = scaled_forward(X, self.tm)
         err = np.mean(np.abs(f - val))
         self.assertAlmostEqual(err, 0)
@@ -233,7 +233,7 @@ class TestFittingThreeStates(unittest.TestCase):
         random_mask[[1,-1]] = 0
         X = np.where(random_mask==0, np.nan, self.X)
         self.tm._forward_(X)
-        val = self.tm.f
+        val = self.tm._f
         f = scaled_forward(X, self.tm)
         err = np.mean(np.abs(f - val))
         self.assertAlmostEqual(err, 0)
@@ -244,14 +244,14 @@ class TestFittingThreeStates(unittest.TestCase):
         random_mask[[1,-1]] = 1
         X = np.where(random_mask==0, np.nan, self.X)
         self.tm._forward_(X)
-        val = self.tm.f
+        val = self.tm._f
         f = scaled_forward(X, self.tm)
         err = np.mean(np.abs(f - val))
         self.assertAlmostEqual(err, 0)
 
     def test_backward_no_missing(self):
         self.tm._backward_(self.X)
-        val = self.tm.b
+        val = self.tm._b
         self.assertEqual(val.shape, (2, 7, 3))
 
         b = scaled_backward(self.X, self.tm)
@@ -264,7 +264,7 @@ class TestFittingThreeStates(unittest.TestCase):
         random_mask[[1,-1]] = 0
         X = np.where(random_mask==0, np.nan, self.X)
         self.tm._backward_(X)
-        val = self.tm.b
+        val = self.tm._b
         b = scaled_backward(X, self.tm)
         err = np.mean(np.abs(b - val))
         self.assertAlmostEqual(err, 0)
@@ -275,7 +275,7 @@ class TestFittingThreeStates(unittest.TestCase):
         random_mask[[1,-1]] = 0
         X = np.where(random_mask==0, np.nan, self.X)
         self.tm._backward_(X)
-        val = self.tm.b
+        val = self.tm._b
         b = scaled_backward(X, self.tm)
         err = np.mean(np.abs(b - val))
         self.assertAlmostEqual(err, 0)
@@ -286,7 +286,7 @@ class TestFittingThreeStates(unittest.TestCase):
         random_mask[[1,-1]] = 1
         X = np.where(random_mask==0, np.nan, self.X)
         self.tm._backward_(X)
-        val = self.tm.b
+        val = self.tm._b
         b = scaled_backward(X, self.tm)
         err = np.mean(np.abs(b - val))
         self.assertAlmostEqual(err, 0)
