@@ -3,6 +3,7 @@ from collections import deque
 from itertools import product
 import numpy as np
 from scipy import stats
+from .cpp.update import scaled_forward, scaled_backward # type: ignore
 
 class TraceModel:
 
@@ -79,34 +80,15 @@ class TraceModel:
         return np.where(np.isnan(vals), 1, vals)
     
     def _forward_(self, X:np.ndarray):
-        f = np.zeros((self._N, self._T, self._S))
-        alpha = np.zeros((self._N, self._T))
-        states = np.arange(self._S)
-        for t in range(self._T):
-            den = self.density(states, X[:,t])
-            if t==0:
-                raw = self._mu*den.T    
-            else:
-                raw = (f[:,t-1,:]@self._P)*den.T
-            alpha[:,t] = np.sum(raw, axis=1)
-            f[:,t,:] = raw/alpha[:,[t]]
-        self._alpha = alpha
-        self._f = f
+        den = self.density(np.arange(self._S), X)
+        sf = scaled_forward(den, self.mu, self.P, self.N, self.T, self.S)
+        self._alpha = sf[:,:,-1]
+        self._f = sf[:,:,:-1]
 
     def _backward_(self, X:np.ndarray):
-        b = np.zeros((self._N, self._T, self._S))
-        beta = np.zeros((self._N, self._T))
-        states = np.arange(self._S)
-        for t in range(self._T-1, -1, -1):
-            if t == self._T-1:
-                raw = np.ones((self._N, self._S))
-            else:
-                den = self.density(states, X[:,t+1])
-                raw = (self._P@(b[:,t+1,:].T*den)).T
-            beta[:,t] = np.sum(raw, axis=1)
-            b[:,t,:] = raw/beta[:,[t]]
-        self._beta = beta
-        self._b = b
+        den = self.density(np.arange(self._S), X)
+        sb = scaled_backward(den, self.P, self.N, self.T, self.S)
+        self._b = sb
 
     def _calculate_u_(self):
         u_raw = self._f*self._b
@@ -145,7 +127,7 @@ class TraceModel:
         # update P after calculating the mean absolute error
         self._P[self._m] = P_hat[self._m]
 
-    def fit(self, max_iter:int=100):
+    def fit(self, max_iter:int=100, cutoff=1e-4):
         for _ in range(max_iter):
             self._forward_(self._X)
             self._backward_(self._X)
@@ -154,7 +136,7 @@ class TraceModel:
             self._calculate_v_(self._X)
 
             self._update_params_()
-            if self._convergence[-1] < 1e-4:
+            if self._convergence[-1] < cutoff:
                 print(f"Converged at iteration {len(self._convergence)}")
                 break
 
@@ -180,3 +162,56 @@ class TraceModel:
         if X is None:
             X = self._X
         return np.stack([self._viterbi_(x) for x in X])
+    
+
+class TraceSimulator:
+    def __init__(
+            self,
+            P:np.ndarray,
+            mu:np.ndarray,
+            dist_params:tuple[dict, ...],
+            dist_type=stats.norm
+    ):
+        self.P = P
+        self.mu = mu
+        self._dist_params = dist_params
+        self._dist_type = dist_type
+
+    def simulate_single_trace(self, T:int):
+        H = [np.random.choice(len(self.mu), p=self.mu)]
+        for t in range(1, T):
+            H.append(np.random.choice(len(self.mu), p=self.P[H[-1]]))
+        H = np.array(H)
+        
+        X = np.zeros_like(H)
+        for s in range(len(self.mu)):
+            args = self._dist_params[s]
+            x = self._dist_type.rvs(**args, size=T)
+            X = np.where(H==s, x, X)
+        return H, X
+    
+    def simulate_multiple_traces(self, T:int, N:int):
+        result =  np.stack([
+            self.simulate_single_trace(T) for _ in range(N)
+        ])
+        H = result[:,0,:].astype("int64")
+        X = result[:,1,:]
+        return H, X
+    
+    @staticmethod
+    def mask_spatial_distance(self, X:np.ndarray, p_obs:float):
+        mask = np.random.choice(2, size=X.shape, p=[1 - p_obs, p_obs])
+        masked_X = np.where(mask==0, np.nan, X)
+        return masked_X
+    
+    def mask_by_markov_chain(self, X:np.ndarray, p_obs:float, a:float=0.8):
+        b = 1 - (1 - p_obs)*(1 - a)/p_obs
+        print(f"P(stay observed) = {round(b, 3)}")
+        P = np.array([
+            [a, 1 - a],
+            [1 - b, b]
+        ])
+        mu = np.array([1 - p_obs, p_obs])
+        mc = TraceSimulator(P, mu, self._dist_params)
+        mask = mc.simulate_multiple_traces(X.shape[1], X.shape[0])[0]
+        return np.where(mask==0, np.nan, X)

@@ -2,7 +2,22 @@ import unittest
 from collections import deque
 import numpy as np
 from scipy import stats
-from . import model
+from .. import model
+
+
+def scaled_forward_arr(X, tm):
+    f = np.zeros((tm._N, tm._T, tm._S))
+    alpha = np.zeros((tm._N, tm._T))
+    states = np.arange(tm._S)
+    for t in range(tm._T):
+        den = tm.density(states, X[:,t])
+        if t==0:
+            raw = tm._mu*den.T    
+        else:
+            raw = (f[:,t-1,:]@tm._P)*den.T
+        alpha[:,t] = np.sum(raw, axis=1)
+        f[:,t,:] = raw/alpha[:,[t]]
+    return f
 
 
 def scaled_forward(X, tm):
@@ -18,6 +33,21 @@ def scaled_forward(X, tm):
                     f[n,t,s] = den*sum([f[n,t-1,sp]*tm.P[sp,s] for sp in range(S)])
             f[n,t,:] = f[n,t,:]/np.sum(f[n,t,:])
     return f
+
+
+def scaled_backward_arr(X, tm):
+    b = np.zeros((tm._N, tm._T, tm._S))
+    beta = np.zeros((tm._N, tm._T))
+    states = np.arange(tm._S)
+    for t in range(tm._T-1, -1, -1):
+        if t == tm._T-1:
+            raw = np.ones((tm._N, tm._S))
+        else:
+            den = tm.density(states, X[:,t+1])
+            raw = (tm._P@(b[:,t+1,:].T*den)).T
+        beta[:,t] = np.sum(raw, axis=1)
+        b[:,t,:] = raw/beta[:,[t]]
+    return b
 
 
 def scaled_backward(X, tm):
