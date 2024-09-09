@@ -27,6 +27,16 @@ gitAdd:
 devel:
 	python -m pip install -e .
 
+initSphinx:
+	sphinx-quickstart docs
+	sphinx-build -M html docs/source/ docs/build/
+
+	# everytime index.rst or other rst is modified, run
+	cd docs; make html; cd ..
+
+	# new theme
+	python -m pip install furo
+
 html: devel
 	cd docs; sphinx-apidoc -o . ../; \
 		make clean; make html
