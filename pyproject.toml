@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "traceHMM"
+version = "0.0.0"
+authors = [
+  { name="Hongyu Yu", email="hongyuyu@unc.edu" },
+  { name="Shreya Mishra", email="mishras10@ccf.org" }
+  { name="Tee Udomlumleart", email="teeu@stanford.edu" },
+  { name="Sion Kim", email="sionkim@umich.edu" },
+  { name="Paul Meneses", email="paul.meneses@childrens.harvard.edu" }
+]
+description = "Inference of chromatin loops from live cell imaging data"
+readme = "README.md"
+requires-python = ">=3.12"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: GPL-3.0",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "numpy>=1.26.4",
+    "pandas>=2.2.1",
+    "scipy>=1.12.0",
+    "matplotlib>=3.8.3",
+    "seaborn>=0.13.2",
+    "pybind11>=2.13.5",
+    "pytest>=8.3.2"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/hyuyu104/TraceModel"
+"Bug Tracker" = "https://github.com/hyuyu104/TraceModel/issues"
+
+[tool.setuptools]
+packages = ["traceHMM"]
+py-modules = ["__init__"]

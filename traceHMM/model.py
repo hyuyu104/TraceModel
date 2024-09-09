@@ -1,3 +1,6 @@
+""" The TraceModel class and a simulator for Markov chains.
+"""
+
 from typing import Callable
 from collections import deque
 from itertools import product
@@ -6,7 +9,40 @@ from scipy import stats
 from .cpp.update import scaled_forward, scaled_backward # type: ignore
 
 class TraceModel:
+    """_summary_
+    
+    Parameters
+        ----------
+        X : (N, T) np.ndarray
+            Spatial distance of N trajectories over T time points.
+        Pm : (S, S) np.ndarray
+            Initial transition matrix. Entries with negative values will be 
+            updated. Entries with positive values will not be updated and will 
+            be the same after fitting.
+        dist_params : tuple[dict, ...]
+            Tuple of length S. Each element is a dictionary specifying the 
+            parameters of the distribution at each state.
+        dist_type : _type_, optional
+            A distribution class that has a `pdf` method, by default stats.norm. 
+            `dist_params` will be passed in as keyword arguments.
+            
+    Attributes
+        ----------
+        P : (S, S) np.ndarray
+            Transition probability.
+        mu : (S) np.ndarray
+            Initial distribution. Initialized to be uniform in each state.
+        N : int
+            Number of trajectories in `X`.
+        T : int
+            Number of time points in `X`.
+        S : int
+            Number of states.
+        convergence : list
+            The mean absolute difference between the updated transition matrix 
+            and the transition matrix from the last iteration.
 
+    """
     def __init__(
             self, 
             X:np.ndarray,
@@ -81,13 +117,13 @@ class TraceModel:
     
     def _forward_(self, X:np.ndarray):
         den = self.density(np.arange(self._S), X)
-        sf = scaled_forward(den, self.mu, self.P, self.N, self.T, self.S)
+        sf = scaled_forward(den, self._mu, self._P, self._N, self._T, self._S)
         self._alpha = sf[:,:,-1]
         self._f = sf[:,:,:-1]
 
     def _backward_(self, X:np.ndarray):
         den = self.density(np.arange(self._S), X)
-        sb = scaled_backward(den, self.P, self.N, self.T, self.S)
+        sb = scaled_backward(den, self._P, self._N, self._T, self._S)
         self._b = sb
 
     def _calculate_u_(self):
@@ -127,7 +163,18 @@ class TraceModel:
         # update P after calculating the mean absolute error
         self._P[self._m] = P_hat[self._m]
 
-    def fit(self, max_iter:int=100, cutoff=1e-4):
+    def fit(self, max_iter:int=100, cutoff:float=1e-4):
+        """Fit the TraceModel using the input data.
+
+        Parameters
+        ----------
+        max_iter : int, optional
+            Maximum number of iterations, by default 100
+        cutoff : float, optional
+            Criterion to terminate iterations, by default 1e-4. Fitting will 
+            end if the mean absolute difference of transition matrix is below 
+            this cutoff.
+        """
         for _ in range(max_iter):
             self._forward_(self._X)
             self._backward_(self._X)
@@ -159,12 +206,50 @@ class TraceModel:
         return np.array(decoded_states)
     
     def decode(self, X:np.ndarray=None) -> np.ndarray:
+        """Predict the looping status of the input data using the fitted 
+        model. Has to be run after `fit`.
+
+        Parameters
+        ----------
+        X : np.ndarray, optional
+            New chromatin trace to predict looping status, by default None. If
+            None is passed, will return the predicted loop status of the input
+            used to train the model.
+
+        Returns
+        -------
+        np.ndarray
+            Same shape as `X`. Contains the prediction result.
+        """
         if X is None:
             X = self._X
         return np.stack([self._viterbi_(x) for x in X])
     
 
 class TraceSimulator:
+    """Simulate chromatin traces based on a Markov chain.
+    
+    Parameters
+        ----------
+        P : (S, S) np.ndarray
+            The transition probability of the Markov chain.
+        mu : (S) np.ndarray
+            The initial distribution.
+        dist_params : tuple[dict, ...]
+            Tuple of length S. Each element is a dictionary specifying the 
+            parameters of the distribution at each state.
+        dist_type : _type_, optional
+            A distribution class that has a `rvs` method, by default stats.norm. 
+            `dist_params` will be passed in as keyword arguments.
+            
+    Attributes
+        ---------
+        P : (S, S) np.ndarray
+            Transition probability.
+        mu : (S) np.ndarray
+            Initial distribution. Initialized to be uniform in each state.
+        
+    """
     def __init__(
             self,
             P:np.ndarray,
@@ -172,25 +257,67 @@ class TraceSimulator:
             dist_params:tuple[dict, ...],
             dist_type=stats.norm
     ):
-        self.P = P
-        self.mu = mu
+        self._P = P
+        self._mu = mu
         self._dist_params = dist_params
         self._dist_type = dist_type
+        
+    @property
+    def P(self) -> np.ndarray:
+        return self._P
+    
+    @property
+    def mu(self) -> np.ndarray:
+        return self._mu
 
-    def simulate_single_trace(self, T:int):
-        H = [np.random.choice(len(self.mu), p=self.mu)]
+    def simulate_single_trace(
+            self, T:int
+        ) -> tuple[np.ndarray, np.ndarray]:
+        """Simulate a single trace based on the input transition matrix and
+        initial distribution.
+
+        Parameters
+        ----------
+        T : int
+            Number of time points to generate.
+
+        Returns
+        -------
+        tuple[(T) np.ndarray, (T) np.ndarray]
+            The first element is the true loop status of the trace. The second
+            element is the spatial distance generated at each time point.
+        """
+        H = [np.random.choice(len(self._mu), p=self._mu)]
         for t in range(1, T):
-            H.append(np.random.choice(len(self.mu), p=self.P[H[-1]]))
+            H.append(np.random.choice(len(self._mu), p=self._P[H[-1]]))
         H = np.array(H)
         
         X = np.zeros_like(H)
-        for s in range(len(self.mu)):
+        for s in range(len(self._mu)):
             args = self._dist_params[s]
             x = self._dist_type.rvs(**args, size=T)
             X = np.where(H==s, x, X)
         return H, X
     
-    def simulate_multiple_traces(self, T:int, N:int):
+    def simulate_multiple_traces(
+            self, T:int, N:int
+        ) -> tuple[np.ndarray, np.ndarray]:
+        """Simulate multiple traces based on the input transition matrix and
+        initial distribution.
+
+        Parameters
+        ----------
+        T : int
+            Number of time points to generate.
+        N : int
+            Number of traces to generate.
+
+        Returns
+        -------
+        tuple[(N, T) np.ndarray, (N, T) np.ndarray]
+            The first element is the true loop status of the trace. The second
+            element is the spatial distance generated at each time point.
+        """
         result =  np.stack([
             self.simulate_single_trace(T) for _ in range(N)
         ])
@@ -199,12 +326,51 @@ class TraceSimulator:
         return H, X
     
     @staticmethod
-    def mask_spatial_distance(self, X:np.ndarray, p_obs:float):
+    def mask_spatial_distance(
+        self, X:np.ndarray, p_obs:float
+    ) -> np.ndarray:
+        """Mask spatial distance uniformly at random to simulate the missing
+        data problem observed in real imaging data.
+
+        Parameters
+        ----------
+        X : (..., T) np.ndarray
+            Input spatial distance to be masked.
+        p_obs : float
+            The observed probability.
+
+        Returns
+        -------
+        (..., T) np.ndarray
+            Same shape as `X` with missing observations filled by NaN.
+        """
         mask = np.random.choice(2, size=X.shape, p=[1 - p_obs, p_obs])
         masked_X = np.where(mask==0, np.nan, X)
         return masked_X
     
-    def mask_by_markov_chain(self, X:np.ndarray, p_obs:float, a:float=0.8):
+    def mask_by_markov_chain(
+        self, X:np.ndarray, p_obs:float, a:float=0.8
+    ) -> np.ndarray:
+        """Mask spatial distance by a two-state Markov chain. This is inspired 
+        by the fact that missing observations are typically continuous in real
+        imaging data.
+
+        Parameters
+        ----------
+        X : (..., T) np.ndarray
+            Input spatial distance to be masked.
+        p_obs : float
+            The observed probability.
+        a : float, optional
+            P(stay unobserved), by default 0.8. Needed as otherwise the linear
+            system resulting from stationary distribution has infinite 
+            solutions.
+
+        Returns
+        -------
+        (..., T) np.ndarray
+            Same shape as `X` with missing observations filled by NaN.
+        """
         b = 1 - (1 - p_obs)*(1 - a)/p_obs
         print(f"P(stay observed) = {round(b, 3)}")
         P = np.array([

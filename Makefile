@@ -9,13 +9,16 @@ clearCpp:
 	rm traceHMM/cpp/update.cpython-312-darwin.so
 	rm -r traceHMM/__pycache__
 
-keepCppCompiledOnly:
-	mv traceHMM/cpp/update.cpython-312-darwin.so traceHMM/
-	rm -r traceHMM/cpp
-	mkdir traceHMM/cpp
-	mv traceHMM/update.cpython-312-darwin.so traceHMM/cpp/
+# keepCppCompiledOnly:
+# 	mv traceHMM/cpp/update.cpython-312-darwin.so traceHMM/
+# 	rm -r traceHMM/cpp
+# 	mkdir traceHMM/cpp
+# 	mv traceHMM/update.cpython-312-darwin.so traceHMM/cpp/
 
 gitAdd:
 	git add -A traceHMM
 	git add Makefile
 	git add README.md
+	git add -A docs
+	git add pyproject.toml
+	git add .readthedocs.yaml

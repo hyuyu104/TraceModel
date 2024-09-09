@@ -17,13 +17,13 @@ def ffill(
     Parameters
     ----------
     data : pd.DataFrame
-        Input dataframe with missing rows or rows with NaNs
+        Input dataframe with missing rows or rows with NaNs.
     tracj_id_col : str
-        The column name of trajectory id
+        The column name of trajectory id.
     time_col : str
-        The column name of time
+        The column name of time.
     dist_col : str
-        The column name of spatial distance
+        The column name of spatial distance.
     method : str, optional
         Tilling method, by default "ffill". Passed to pd.reindex function.
     limit : int, optional
@@ -51,18 +51,18 @@ def ffill(
 
 
 def stationary_dist(P:np.ndarray) -> np.ndarray:
-    """Find the stationary distribution of a transition matrix.
-    Calculate the eigenvector of P' with corresponding eigenvalue being one.
+    """Find the stationary distribution of a transition matrix. Calculate the 
+    eigenvector of P' with corresponding eigenvalue being one.
 
     Parameters
     ----------
-    P : np.ndarray
-        input transition matrix
+    P : (S, S) np.ndarray
+        Input transition matrix.
 
     Returns
     -------
-    np.ndarray
-        stationary distribution
+    (S) np.ndarray
+        Stationary distribution.
     """
     L, V = np.linalg.eig(P.T)
     v = V[:, np.abs(L - 1) < 1e-10]
