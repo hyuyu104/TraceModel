@@ -14,6 +14,7 @@ version = '0.0.0'
 source_suffix = {".rst": "restructuredtext", ".md": "markdown"}
 
 extensions = [
+    'myst_parser',
     'sphinx.ext.duration',
     'sphinx.ext.doctest',
     'sphinx.ext.autodoc',
