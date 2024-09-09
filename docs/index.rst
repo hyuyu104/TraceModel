@@ -16,4 +16,6 @@ documentation for details.
    :caption: Contents:
 
    traceHMM
+   traceHMM.utils
+   traceHMM.test
 

@@ -20,7 +20,8 @@
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="TraceModel documentation" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -45,39 +46,39 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <!-- Local TOC -->
-              <div class="local-toc"><ul>
-<li><a class="reference internal" href="#">traceHMM package</a><ul>
-<li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#module-traceHMM.model">traceHMM.model module</a><ul>
-<li><a class="reference internal" href="#traceHMM.model.TraceModel"><code class="docutils literal notranslate"><span class="pre">TraceModel</span></code></a><ul>
-<li><a class="reference internal" href="#traceHMM.model.TraceModel.N"><code class="docutils literal notranslate"><span class="pre">TraceModel.N</span></code></a></li>
-<li><a class="reference internal" href="#traceHMM.model.TraceModel.P"><code class="docutils literal notranslate"><span class="pre">TraceModel.P</span></code></a></li>
-<li><a class="reference internal" href="#traceHMM.model.TraceModel.S"><code class="docutils literal notranslate"><span class="pre">TraceModel.S</span></code></a></li>
-<li><a class="reference internal" href="#traceHMM.model.TraceModel.T"><code class="docutils literal notranslate"><span class="pre">TraceModel.T</span></code></a></li>
-<li><a class="reference internal" href="#traceHMM.model.TraceModel.convergence"><code class="docutils literal notranslate"><span class="pre">TraceModel.convergence</span></code></a></li>
-<li><a class="reference internal" href="#traceHMM.model.TraceModel.decode"><code class="docutils literal notranslate"><span class="pre">TraceModel.decode()</span></code></a></li>
-<li><a class="reference internal" href="#traceHMM.model.TraceModel.density"><code class="docutils literal notranslate"><span class="pre">TraceModel.density()</span></code></a></li>
-<li><a class="reference internal" href="#traceHMM.model.TraceModel.fit"><code class="docutils literal notranslate"><span class="pre">TraceModel.fit()</span></code></a></li>
-<li><a class="reference internal" href="#traceHMM.model.TraceModel.mu"><code class="docutils literal notranslate"><span class="pre">TraceModel.mu</span></code></a></li>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">traceHMM package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-traceHMM.model">traceHMM.model module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#traceHMM.model.TraceModel"><code class="docutils literal notranslate"><span class="pre">TraceModel</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#traceHMM.model.TraceModel.N"><code class="docutils literal notranslate"><span class="pre">TraceModel.N</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#traceHMM.model.TraceModel.P"><code class="docutils literal notranslate"><span class="pre">TraceModel.P</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#traceHMM.model.TraceModel.S"><code class="docutils literal notranslate"><span class="pre">TraceModel.S</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#traceHMM.model.TraceModel.T"><code class="docutils literal notranslate"><span class="pre">TraceModel.T</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#traceHMM.model.TraceModel.convergence"><code class="docutils literal notranslate"><span class="pre">TraceModel.convergence</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#traceHMM.model.TraceModel.decode"><code class="docutils literal notranslate"><span class="pre">TraceModel.decode()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#traceHMM.model.TraceModel.density"><code class="docutils literal notranslate"><span class="pre">TraceModel.density()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#traceHMM.model.TraceModel.fit"><code class="docutils literal notranslate"><span class="pre">TraceModel.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#traceHMM.model.TraceModel.mu"><code class="docutils literal notranslate"><span class="pre">TraceModel.mu</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#traceHMM.model.TraceSimulator"><code class="docutils literal notranslate"><span class="pre">TraceSimulator</span></code></a><ul>
-<li><a class="reference internal" href="#traceHMM.model.TraceSimulator.P"><code class="docutils literal notranslate"><span class="pre">TraceSimulator.P</span></code></a></li>
-<li><a class="reference internal" href="#traceHMM.model.TraceSimulator.mask_by_markov_chain"><code class="docutils literal notranslate"><span class="pre">TraceSimulator.mask_by_markov_chain()</span></code></a></li>
-<li><a class="reference internal" href="#traceHMM.model.TraceSimulator.mask_spatial_distance"><code class="docutils literal notranslate"><span class="pre">TraceSimulator.mask_spatial_distance()</span></code></a></li>
-<li><a class="reference internal" href="#traceHMM.model.TraceSimulator.mu"><code class="docutils literal notranslate"><span class="pre">TraceSimulator.mu</span></code></a></li>
-<li><a class="reference internal" href="#traceHMM.model.TraceSimulator.simulate_multiple_traces"><code class="docutils literal notranslate"><span class="pre">TraceSimulator.simulate_multiple_traces()</span></code></a></li>
-<li><a class="reference internal" href="#traceHMM.model.TraceSimulator.simulate_single_trace"><code class="docutils literal notranslate"><span class="pre">TraceSimulator.simulate_single_trace()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a class="reference internal" href="#module-traceHMM">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#traceHMM.model.TraceSimulator"><code class="docutils literal notranslate"><span class="pre">TraceSimulator</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#traceHMM.model.TraceSimulator.P"><code class="docutils literal notranslate"><span class="pre">TraceSimulator.P</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#traceHMM.model.TraceSimulator.mask_by_markov_chain"><code class="docutils literal notranslate"><span class="pre">TraceSimulator.mask_by_markov_chain()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#traceHMM.model.TraceSimulator.mask_spatial_distance"><code class="docutils literal notranslate"><span class="pre">TraceSimulator.mask_spatial_distance()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#traceHMM.model.TraceSimulator.mu"><code class="docutils literal notranslate"><span class="pre">TraceSimulator.mu</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#traceHMM.model.TraceSimulator.simulate_multiple_traces"><code class="docutils literal notranslate"><span class="pre">TraceSimulator.simulate_multiple_traces()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#traceHMM.model.TraceSimulator.simulate_single_trace"><code class="docutils literal notranslate"><span class="pre">TraceSimulator.simulate_single_trace()</span></code></a></li>
 </ul>
 </li>
 </ul>
-</div>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-traceHMM">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
         </div>
       </div>
     </nav>
@@ -370,7 +371,9 @@ element is the spatial distance generated at each time point.</p>
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="TraceModel documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
 
   <hr/>
 

@@ -28,4 +28,5 @@ devel:
 	python -m pip install -e .
 
 html: devel
-	cd docs; make clean; make html
+	cd docs; sphinx-apidoc -o . ../; \
+		make clean; make html
