@@ -7,7 +7,7 @@ name = "traceHMM"
 version = "0.0.0"
 authors = [
   { name="Hongyu Yu", email="hongyuyu@unc.edu" },
-  { name="Shreya Mishra", email="mishras10@ccf.org" }
+  { name="Shreya Mishra", email="mishras10@ccf.org" },
   { name="Tee Udomlumleart", email="teeu@stanford.edu" },
   { name="Sion Kim", email="sionkim@umich.edu" },
   { name="Paul Meneses", email="paul.meneses@childrens.harvard.edu" }

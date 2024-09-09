@@ -22,3 +22,10 @@ gitAdd:
 	git add -A docs
 	git add pyproject.toml
 	git add .readthedocs.yaml
+	git add LICENSE
+
+devel:
+	python -m pip install -e .
+
+html: devel
+	cd docs; make clean; make html
