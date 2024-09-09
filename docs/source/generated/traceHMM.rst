@@ -1,6 +1,0 @@
-traceHMM
-========
-
-.. automodule:: traceHMM
-
-   

@@ -1,6 +1,8 @@
-API
-===
+API Reference
+=============
 
-.. automodule:: traceHMM
-   :members:
-   :imported-members:
+.. toctree::
+   
+   traceHMM
+   traceHMM.utils
+   .. modules

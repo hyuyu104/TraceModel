@@ -1,6 +1,6 @@
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../../'))
+sys.path.insert(0, os.path.abspath('../..'))
 
 # -- Project information ----------------------------------------
 
@@ -22,12 +22,16 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.intersphinx',
+    'sphinx.ext.napoleon' # numpy style
 ]
 
 # for README.md
 myst_enable_extensions = [
     "html_image",
 ]
+
+napoleon_google_docstring = False
+napoleon_numpy_docstring = True
 
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3/', None),

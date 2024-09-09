@@ -37,6 +37,10 @@ initSphinx:
 	# new theme
 	python -m pip install furo
 
+	python -m pip install sphinxcontrib-napoleon
+	cd docs; sphinx-apidoc -o source ../traceHMM; cd ..
+
 html: devel
-	cd docs; sphinx-apidoc -o . ../; \
+	sphinx-build -M html docs/source/ docs/build/
+	cd docs; sphinx-apidoc -o source ../traceHMM; \
 		make clean; make html
