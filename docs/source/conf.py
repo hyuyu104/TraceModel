@@ -3,11 +3,12 @@ import sys
 
 # irrelevant for local build
 # required for readthedocs
+# from unittest.mock import MagicMock
+# sys.modules['matplotlib'] = MagicMock()
+# sys.modules['scipy'] = MagicMock()
 autodoc_mock_imports = [
-    "numpy",
     "pandas",
     "scipy",
-    "matplotlib",
     "seaborn",
     "pybind11",
     "pytest"
