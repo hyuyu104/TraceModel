@@ -1,6 +1,19 @@
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../..'))
+
+# irrelevant for local build
+# required for readthedocs
+autodoc_mock_imports = [
+    "numpy",
+    "pandas",
+    "scipy",
+    "matplotlib",
+    "seaborn",
+    "pybind11",
+    "pytest"
+]
+
+sys.path.insert(0, os.path.abspath('../../traceHMM'))
 
 # -- Project information ----------------------------------------
 

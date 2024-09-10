@@ -16,8 +16,8 @@ class TraceModel:
             Spatial distance of N trajectories over T time points.
         Pm : (S, S) np.ndarray
             Initial transition matrix. Entries with negative values will be 
-            updated. Entries with positive values will not be updated and will 
-            be the same after fitting.
+            updated. Other entries with nonnegative values will not be updated 
+            and will be the same after fitting.
         dist_params : tuple[dict, ...]
             Tuple of length S. Each element is a dictionary specifying the 
             parameters of the distribution at each state.
@@ -51,35 +51,33 @@ class TraceModel:
 
     @property
     def P(self) -> np.ndarray:
-        """(S, S) np.ndarray Transition probability.
-        """
+        """Transition probability matrix."""
         return self._P
     
     @property
     def mu(self) -> np.ndarray:
-        """mu : (S) np.ndarray Initial distribution. Initialized to be uniform in each state."""
+        """Initial distribution. Initialized to be uniform in each state."""
         return self._mu
     
     @property
     def N(self) -> int:
-        """N : int Number of trajectories in `X`."""
+        """Number of trajectories in `X`."""
         return self._N
     
     @property
     def T(self) -> int:
-        """" T : int Number of time points in `X`."""
+        """Number of time points in `X`."""
         return self._T
     
     @property
     def S(self) -> int:
-        """S : int Number of states."""
+        """Number of states."""
         return self._S
     
     @property
-    def convergence(self) -> np.ndarray:
-        """convergence : list
-            The mean absolute difference between the updated transition matrix 
-            and the transition matrix from the last iteration.
+    def convergence(self) -> list:
+        """The mean absolute difference between the updated transition matrix 
+        and the transition matrix from the last iteration.
         """
         return self._convergence
 
@@ -262,12 +260,12 @@ class TraceSimulator:
         
     @property
     def P(self) -> np.ndarray:
-        """P : (S, S) np.ndarray Transition probability."""
+        """Transition probability matrix."""
         return self._P
     
     @property
     def mu(self) -> np.ndarray:
-        """mu : (S) np.ndarray Initial distribution. Initialized to be uniform in each state."""
+        """Initial distribution. Initialized to be uniform in each state."""
         return self._mu
 
     def simulate_single_trace(

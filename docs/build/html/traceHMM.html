@@ -201,17 +201,10 @@
   <ul class="current">
 <li class="toctree-l1 current has-children"><a class="reference internal" href="api.html">API Reference</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of API Reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l2 current has-children"><a class="reference internal" href="modules.html">traceHMM</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of traceHMM</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
-<li class="toctree-l3 current has-children"><a class="current reference internal" href="#">traceHMM package</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of traceHMM package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 current has-children current-page"><a class="current reference internal" href="#">traceHMM package</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of traceHMM package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="traceHMM.utils.html">traceHMM.utils package</a></li>
 </ul>
 </li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l1 current has-children"><a class="reference internal" href="modules.html">traceHMM</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of traceHMM</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
-<li class="toctree-l2 current has-children current-page"><a class="current reference internal" href="#">traceHMM package</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of traceHMM package</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="traceHMM.utils.html">traceHMM.utils package</a></li>
 </ul>
 </li>
 </ul>
@@ -296,8 +289,8 @@
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>X</strong> (<em>(</em><em>N</em><em>, </em><em>T</em><em>) </em><em>np.ndarray</em>) – Spatial distance of N trajectories over T time points.</p></li>
 <li><p><strong>Pm</strong> (<em>(</em><em>S</em><em>, </em><em>S</em><em>) </em><em>np.ndarray</em>) – Initial transition matrix. Entries with negative values will be
-updated. Entries with positive values will not be updated and will
-be the same after fitting.</p></li>
+updated. Other entries with nonnegative values will not be updated
+and will be the same after fitting.</p></li>
 <li><p><strong>dist_params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.12)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a><em>, </em><em>...</em><em>]</em>) – Tuple of length S. Each element is a dictionary specifying the
 parameters of the distribution at each state.</p></li>
 <li><p><strong>dist_type</strong> (<em>_type_</em><em>, </em><em>optional</em>) – A distribution class that has a <cite>pdf</cite> method, by default stats.norm.
@@ -308,53 +301,32 @@ parameters of the distribution at each state.</p></li>
 <dl class="py property">
 <dt class="sig sig-object py" id="traceHMM.model.TraceModel.N">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">N</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a></em><a class="headerlink" href="#traceHMM.model.TraceModel.N" title="Link to this definition">¶</a></dt>
-<dd><p>int Number of trajectories in <cite>X</cite>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>N</p>
-</dd>
-</dl>
+<dd><p>Number of trajectories in <cite>X</cite>.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="traceHMM.model.TraceModel.P">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">P</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#traceHMM.model.TraceModel.P" title="Link to this definition">¶</a></dt>
-<dd><p>(S, S) np.ndarray Transition probability.</p>
+<dd><p>Transition probability matrix.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="traceHMM.model.TraceModel.S">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">S</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a></em><a class="headerlink" href="#traceHMM.model.TraceModel.S" title="Link to this definition">¶</a></dt>
-<dd><p>int Number of states.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>S</p>
-</dd>
-</dl>
+<dd><p>Number of states.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="traceHMM.model.TraceModel.T">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">T</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a></em><a class="headerlink" href="#traceHMM.model.TraceModel.T" title="Link to this definition">¶</a></dt>
-<dd><p>int Number of time points in <cite>X</cite>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>“ T</p>
-</dd>
-</dl>
+<dd><p>Number of time points in <cite>X</cite>.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="traceHMM.model.TraceModel.convergence">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convergence</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#traceHMM.model.TraceModel.convergence" title="Link to this definition">¶</a></dt>
-<dd><p>list
-The mean absolute difference between the updated transition matrix
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convergence</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><span class="pre">list</span></a></em><a class="headerlink" href="#traceHMM.model.TraceModel.convergence" title="Link to this definition">¶</a></dt>
+<dd><p>The mean absolute difference between the updated transition matrix
 and the transition matrix from the last iteration.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>convergence</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -416,14 +388,7 @@ this cutoff.</p></li>
 <dl class="py property">
 <dt class="sig sig-object py" id="traceHMM.model.TraceModel.mu">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mu</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#traceHMM.model.TraceModel.mu" title="Link to this definition">¶</a></dt>
-<dd><ol class="upperalpha simple" start="19">
-<li><p>np.ndarray Initial distribution. Initialized to be uniform in each state.</p></li>
-</ol>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>mu</p>
-</dd>
-</dl>
+<dd><p>Initial distribution. Initialized to be uniform in each state.</p>
 </dd></dl>
 
 </dd></dl>
@@ -448,12 +413,7 @@ parameters of the distribution at each state.</p></li>
 <dl class="py property">
 <dt class="sig sig-object py" id="traceHMM.model.TraceSimulator.P">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">P</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#traceHMM.model.TraceSimulator.P" title="Link to this definition">¶</a></dt>
-<dd><p>(S, S) np.ndarray Transition probability.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>P</p>
-</dd>
-</dl>
+<dd><p>Transition probability matrix.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -505,14 +465,7 @@ data problem observed in real imaging data.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="traceHMM.model.TraceSimulator.mu">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mu</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#traceHMM.model.TraceSimulator.mu" title="Link to this definition">¶</a></dt>
-<dd><ol class="upperalpha simple" start="19">
-<li><p>np.ndarray Initial distribution. Initialized to be uniform in each state.</p></li>
-</ol>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>mu</p>
-</dd>
-</dl>
+<dd><p>Initial distribution. Initialized to be uniform in each state.</p>
 </dd></dl>
 
 <dl class="py method">
