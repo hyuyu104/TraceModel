@@ -7,8 +7,10 @@ import sys
 # sys.modules['matplotlib'] = MagicMock()
 # sys.modules['scipy'] = MagicMock()
 autodoc_mock_imports = [
+    "numpy",
     "pandas",
     "scipy",
+    "matplotlib",
     "seaborn",
     "pybind11",
     "pytest"
