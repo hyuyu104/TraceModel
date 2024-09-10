@@ -1,6 +1,14 @@
 traceHMM package
 ================
 
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   traceHMM.utils
+
 Submodules
 ----------
 

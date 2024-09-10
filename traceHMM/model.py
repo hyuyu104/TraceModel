@@ -1,7 +1,6 @@
 """ The TraceModel class and a simulator for Markov chains.
 """
 
-from typing import Callable
 from collections import deque
 from itertools import product
 import numpy as np
@@ -9,9 +8,9 @@ from scipy import stats
 from .cpp.update import scaled_forward, scaled_backward # type: ignore
 
 class TraceModel:
-    """_summary_
+    """Modified hidden Markov model to infer chromatin loops.
     
-    Parameters
+        Parameters
         ----------
         X : (N, T) np.ndarray
             Spatial distance of N trajectories over T time points.
@@ -25,23 +24,6 @@ class TraceModel:
         dist_type : _type_, optional
             A distribution class that has a `pdf` method, by default stats.norm. 
             `dist_params` will be passed in as keyword arguments.
-            
-    Attributes
-        ----------
-        P : (S, S) np.ndarray
-            Transition probability.
-        mu : (S) np.ndarray
-            Initial distribution. Initialized to be uniform in each state.
-        N : int
-            Number of trajectories in `X`.
-        T : int
-            Number of time points in `X`.
-        S : int
-            Number of states.
-        convergence : list
-            The mean absolute difference between the updated transition matrix 
-            and the transition matrix from the last iteration.
-
     """
     def __init__(
             self, 
@@ -69,26 +51,36 @@ class TraceModel:
 
     @property
     def P(self) -> np.ndarray:
+        """(S, S) np.ndarray Transition probability.
+        """
         return self._P
     
     @property
     def mu(self) -> np.ndarray:
+        """mu : (S) np.ndarray Initial distribution. Initialized to be uniform in each state."""
         return self._mu
     
     @property
     def N(self) -> int:
+        """N : int Number of trajectories in `X`."""
         return self._N
     
     @property
     def T(self) -> int:
+        """" T : int Number of time points in `X`."""
         return self._T
     
     @property
     def S(self) -> int:
+        """S : int Number of states."""
         return self._S
     
     @property
     def convergence(self) -> np.ndarray:
+        """convergence : list
+            The mean absolute difference between the updated transition matrix 
+            and the transition matrix from the last iteration.
+        """
         return self._convergence
 
     def density(
@@ -96,6 +88,20 @@ class TraceModel:
             state:int|np.ndarray, 
             x:int|np.ndarray
     ) -> int|np.ndarray:
+        """Calculates the probability of given observation(s) at state(s).
+
+        Parameters
+        ----------
+        state : int | np.ndarray
+            A single state or an array of states to evaluate x.
+        x : int | np.ndarray
+            Observations. Either a number or an array.
+
+        Returns
+        -------
+        int | np.ndarray
+            Probability of observing x at state(s). Will broadcast.
+        """
         if np.issubdtype(type(state), np.integer):
             args = self._dist_params[state]
             vals = self._dist_type.pdf(x, **args)
@@ -193,14 +199,14 @@ class TraceModel:
         states = np.arange(self._S)
 
         v[0] = np.log(self.density(states, x[0])) + np.log(self._mu)
-        for t in range(1, self._T):
+        for t in range(1, len(x)):
             den = self.density(states, x[t])
             logP = np.where(self._P==0, -np.inf, np.log(np.where(self._P==0, 1, self._P)))
             val = v[t-1][:,None] + logP + np.log(den[None,:])
             v[t] = np.max(val, axis=0)
             varg[t-1] = np.argmax(val, axis=0)
 
-        decoded_states = deque([np.argmax(v[t])])
+        decoded_states = deque([np.argmax(v[-1])])
         for t in range(len(x)-2, -1, -1):
             decoded_states.appendleft(varg[t, decoded_states[0]])
         return np.array(decoded_states)
@@ -211,7 +217,7 @@ class TraceModel:
 
         Parameters
         ----------
-        X : np.ndarray, optional
+        X : (N', T') np.ndarray, optional
             New chromatin trace to predict looping status, by default None. If
             None is passed, will return the predicted loop status of the input
             used to train the model.
@@ -229,7 +235,7 @@ class TraceModel:
 class TraceSimulator:
     """Simulate chromatin traces based on a Markov chain.
     
-    Parameters
+        Parameters
         ----------
         P : (S, S) np.ndarray
             The transition probability of the Markov chain.
@@ -241,14 +247,6 @@ class TraceSimulator:
         dist_type : _type_, optional
             A distribution class that has a `rvs` method, by default stats.norm. 
             `dist_params` will be passed in as keyword arguments.
-            
-    Attributes
-        ---------
-        P : (S, S) np.ndarray
-            Transition probability.
-        mu : (S) np.ndarray
-            Initial distribution. Initialized to be uniform in each state.
-        
     """
     def __init__(
             self,
@@ -264,10 +262,12 @@ class TraceSimulator:
         
     @property
     def P(self) -> np.ndarray:
+        """P : (S, S) np.ndarray Transition probability."""
         return self._P
     
     @property
     def mu(self) -> np.ndarray:
+        """mu : (S) np.ndarray Initial distribution. Initialized to be uniform in each state."""
         return self._mu
 
     def simulate_single_trace(
