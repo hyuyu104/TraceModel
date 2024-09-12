@@ -2,7 +2,7 @@ import unittest
 from collections import deque
 import numpy as np
 from scipy import stats
-from .. import model
+from traceHMM import model
 
 
 def scaled_forward_arr(X, tm):

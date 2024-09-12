@@ -37,6 +37,8 @@ initSphinx:
 	python -m pip install furo
 	# parsing numpy docstrings
 	python -m pip install sphinxcontrib-napoleon
+	# install autoapi
+	python -m pip install sphinx-autoapi
 
 html: #devel
 	# sphinx-build -M html docs/source/ docs/build/

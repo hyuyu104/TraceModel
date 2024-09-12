@@ -1,22 +1,5 @@
 import os
 import sys
-import traceHMM
-
-# irrelevant for local build
-# required for readthedocs
-# from unittest.mock import MagicMock
-# sys.modules['matplotlib'] = MagicMock()
-# sys.modules['scipy'] = MagicMock()
-# autodoc_mock_imports = [
-#     "numpy",
-#     "pandas",
-#     "scipy",
-#     "matplotlib",
-#     "seaborn",
-#     "pybind11",
-#     "pytest",
-#     "update"
-# ]
 
 sys.path.insert(0, os.path.abspath('../../traceHMM'))
 
@@ -31,6 +14,16 @@ version = '0.0.0'
 
 # -- General configuration --------------------------------------
 
+autodoc_mock_imports = [
+    "numpy",
+    "pandas",
+    "scipy",
+    "matplotlib",
+    "seaborn",
+    "pybind11",
+    "pytest"
+]
+
 source_suffix = {
     ".rst": "restructuredtext", 
     ".md": "markdown"
@@ -39,6 +32,7 @@ source_suffix = {
 extensions = [
     'sphinx.ext.duration',
     'sphinx.ext.doctest',
+    # 'autoapi.extension',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.intersphinx',
