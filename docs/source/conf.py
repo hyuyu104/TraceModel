@@ -1,5 +1,6 @@
 import os
 import sys
+import traceHMM
 
 # irrelevant for local build
 # required for readthedocs
@@ -32,8 +33,7 @@ version = '0.0.0'
 
 source_suffix = {
     ".rst": "restructuredtext", 
-    ".md": "markdown",
-    ".ipynb": "jupyter notebook"
+    ".md": "markdown"
 }
 
 extensions = [
@@ -44,7 +44,7 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.napoleon', # numpy style
     'sphinx.ext.mathjax', # math symbols
-    'myst_parser'
+    'myst_parser' # markdown files
 ]
 
 # for README.md
@@ -70,5 +70,3 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # -- Options for HTML output ------------------------------------
 
 html_theme = "furo"
-
-html_context = {"default_mode": "light"}
