@@ -203,6 +203,8 @@ class TraceModel:
             val = v[t-1][:,None] + logP + np.log(den[None,:])
             v[t] = np.max(val, axis=0)
             varg[t-1] = np.argmax(val, axis=0)
+            if any(np.abs(v[t]) < 1e-10):
+                raise ValueError(f"{t} iter failed: {v[t].round(3)}")
 
         decoded_states = deque([np.argmax(v[-1])])
         for t in range(len(x)-2, -1, -1):

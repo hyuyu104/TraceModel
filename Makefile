@@ -23,6 +23,8 @@ gitAdd:
 	git add pyproject.toml
 	git add .readthedocs.yaml
 	git add LICENSE
+	git add notebooks
+	git add scripts
 
 devel:
 	python -m pip install -e .
@@ -31,16 +33,13 @@ initSphinx:
 	sphinx-quickstart docs
 	sphinx-build -M html docs/source/ docs/build/
 
-	# everytime index.rst or other rst is modified, run
-	cd docs; make html; cd ..
-
 	# new theme
 	python -m pip install furo
-
+	# parsing numpy docstrings
 	python -m pip install sphinxcontrib-napoleon
-	cd docs; sphinx-apidoc -o source ../traceHMM; cd ..
 
-html: devel
-	sphinx-build -M html docs/source/ docs/build/
+html: #devel
+	# sphinx-build -M html docs/source/ docs/build/
+	sh scripts/jupyterrst.sh # convert jupyter files
 	cd docs; sphinx-apidoc -o source ../traceHMM; \
 		make clean; make html

@@ -6,15 +6,16 @@ import sys
 # from unittest.mock import MagicMock
 # sys.modules['matplotlib'] = MagicMock()
 # sys.modules['scipy'] = MagicMock()
-autodoc_mock_imports = [
-    "numpy",
-    "pandas",
-    "scipy",
-    "matplotlib",
-    "seaborn",
-    "pybind11",
-    "pytest"
-]
+# autodoc_mock_imports = [
+#     "numpy",
+#     "pandas",
+#     "scipy",
+#     "matplotlib",
+#     "seaborn",
+#     "pybind11",
+#     "pytest",
+#     "update"
+# ]
 
 sys.path.insert(0, os.path.abspath('../../traceHMM'))
 
@@ -29,16 +30,21 @@ version = '0.0.0'
 
 # -- General configuration --------------------------------------
 
-source_suffix = {".rst": "restructuredtext", ".md": "markdown"}
+source_suffix = {
+    ".rst": "restructuredtext", 
+    ".md": "markdown",
+    ".ipynb": "jupyter notebook"
+}
 
 extensions = [
-    'myst_parser',
     'sphinx.ext.duration',
     'sphinx.ext.doctest',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.intersphinx',
-    'sphinx.ext.napoleon' # numpy style
+    'sphinx.ext.napoleon', # numpy style
+    'sphinx.ext.mathjax', # math symbols
+    'myst_parser'
 ]
 
 # for README.md
