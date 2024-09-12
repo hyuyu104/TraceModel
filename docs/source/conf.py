@@ -22,7 +22,7 @@ autodoc_mock_imports = [
     "seaborn",
     "pybind11",
     "pytest",
-    "update"
+    "cpp"
 ]
 
 source_suffix = {
