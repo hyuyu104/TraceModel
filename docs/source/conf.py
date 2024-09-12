@@ -21,7 +21,8 @@ autodoc_mock_imports = [
     "matplotlib",
     "seaborn",
     "pybind11",
-    "pytest"
+    "pytest",
+    "update"
 ]
 
 source_suffix = {
