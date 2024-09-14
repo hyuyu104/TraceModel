@@ -17,14 +17,15 @@ clearCpp:
 
 gitAdd:
 	git add -A traceHMM
+	git add -A docs
 	git add Makefile
 	git add README.md
-	git add -A docs
 	git add pyproject.toml
 	git add .readthedocs.yaml
 	git add LICENSE
 	git add notebooks
 	git add scripts
+	git add .gitattributes
 
 devel:
 	python -m pip install -e .

@@ -12,8 +12,8 @@ class TraceModel:
     
         Parameters
         ----------
-        X : (N, T) np.ndarray
-            Spatial distance of N trajectories over T time points.
+        X : (N, T, D) np.ndarray
+            Input value (of D dimension) of N trajectories over T time points.
         Pm : (S, S) np.ndarray
             Initial transition matrix. Entries with negative values will be 
             updated. Other entries with nonnegative values will not be updated 
@@ -32,15 +32,17 @@ class TraceModel:
             dist_params:tuple[dict, ...],
             dist_type=stats.norm
     ):
-        (self._N, self._T), self._S = X.shape, Pm.shape[0]
+        self._N, self._T, self._D = X.shape
+        self._S = Pm.shape[0]
         self._dist_params = dist_params
         self._dist_type = dist_type
         self._X = X
         self._convergence = []
+        self._lklhd = []
         self._m = np.where(Pm < 0)
 
         # expect row sum except the fixed entries
-        self._l = 1 - np.sum(np.where(Pm<0, 0, Pm), axis=1)
+        self._l = 1 - np.sum(np.where(Pm < 0, 0, Pm), axis=1)
         initP = self._l/np.sum(Pm<0, axis=1)
         initP = np.repeat(initP[:,None], self._S, axis=1)
         # initialize transition matrix
@@ -54,10 +56,29 @@ class TraceModel:
         """Transition probability matrix."""
         return self._P
     
+    @P.setter
+    def P(self, value:np.ndarray):
+        """
+        Set transition matrix manually, without changing fixed entries 
+        specified by `Pm`.
+        """
+        P = self._P.copy()
+        P[self._m] = value[self._m]
+        if np.any(np.abs(np.sum(P, axis=1) - 1) > 1e-6):
+            raise ValueError(
+                "Row sum is not one. Note fixed entries are not updated."
+            )
+        self._P = P
+    
     @property
     def mu(self) -> np.ndarray:
         """Initial distribution. Initialized to be uniform in each state."""
         return self._mu
+    
+    @mu.setter
+    def mu(self, value:np.ndarray):
+        """Set initial distribution manually."""
+        self._mu = value
     
     @property
     def N(self) -> int:
@@ -80,11 +101,17 @@ class TraceModel:
         and the transition matrix from the last iteration.
         """
         return self._convergence
+    
+    @property
+    def lklhd(self) -> list:
+        """A list of the log-likelihood of the model at each iteration.
+        """
+        return self._lklhd
 
     def density(
             self, 
             state:int|np.ndarray, 
-            x:int|np.ndarray
+            x:np.ndarray
     ) -> int|np.ndarray:
         """Calculates the probability of given observation(s) at state(s).
 
@@ -92,8 +119,10 @@ class TraceModel:
         ----------
         state : int | np.ndarray
             A single state or an array of states to evaluate x.
-        x : int | np.ndarray
-            Observations. Either a number or an array.
+        x : (..., D) np.ndarray
+            Observations. Can be (T, D), which specifies the observations at T
+            time points, or (N, T, D), which specifies the observations at T
+            time points of N observations.
 
         Returns
         -------
@@ -103,15 +132,10 @@ class TraceModel:
         if np.issubdtype(type(state), np.integer):
             args = self._dist_params[state]
             vals = self._dist_type.pdf(x, **args)
-            if isinstance(x, float):
-                if np.isnan(x):
+            if len(x.shape) == 1:
+                if np.isnan(vals):
                     return 1
                 return vals
-        elif isinstance(x, float):
-            vals = []
-            for s in state:
-                args = self._dist_params[s]
-                vals.append(self._dist_type.pdf(x, **args))
         else:
             vals = np.stack([
                 self._dist_type.pdf(x, **self._dist_params[s])
@@ -181,6 +205,7 @@ class TraceModel:
         """
         for _ in range(max_iter):
             self._forward_(self._X)
+            self._lklhd.append(np.sum(np.log(self._alpha)))
             self._backward_(self._X)
 
             self._calculate_u_()
@@ -217,7 +242,7 @@ class TraceModel:
 
         Parameters
         ----------
-        X : (N', T') np.ndarray, optional
+        X : (N', T', D) np.ndarray, optional
             New chromatin trace to predict looping status, by default None. If
             None is passed, will return the predicted loop status of the input
             used to train the model.
@@ -227,8 +252,7 @@ class TraceModel:
         np.ndarray
             Same shape as `X`. Contains the prediction result.
         """
-        if X is None:
-            X = self._X
+        X = self._X if X is None else X
         return np.stack([self._viterbi_(x) for x in X])
     
 
@@ -381,3 +405,37 @@ class TraceSimulator:
         mc = TraceSimulator(P, mu, self._dist_params)
         mask = mc.simulate_multiple_traces(X.shape[1], X.shape[0])[0]
         return np.where(mask==0, np.nan, X)
+
+
+class multivariate_chisq:
+    def pdf(X:np.ndarray, scales:np.ndarray) -> float|np.ndarray:
+        """Independent scaled Chi-squared distributions each with a degree of 
+        freedom of one.
+
+        Parameters
+        ----------
+        X : np.ndarray
+            Single observations or observations in ndarrays. The last axis has
+            the same dimension as the length of scales.
+        scales : np.ndarray
+            The scale of each Chi-squared distribution. Assume the observation 
+            is $Y^2$, where $Y = s X$ with $X ~ N(0, 1)$. The scale is 
+            $s^2$.
+
+        Returns
+        -------
+        float|np.ndarray
+            The probability density of the observations.
+
+        Raises
+        ------
+        ValueError
+            If the shape of the last axis of `X` does not match `scales`.
+        """
+        if X.shape[-1] != len(scales):
+            raise ValueError("Mismatch input and scale shape.")
+        
+        vals = []
+        for i, scale in enumerate(scales):
+            vals.append(stats.chi2.pdf(X[...,i]/scale, df=1)/scale)
+        return np.prod(vals, axis=0)
