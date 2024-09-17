@@ -20,6 +20,14 @@ traceHMM.model module
    :undoc-members:
    :show-inheritance:
 
+traceHMM.update module
+----------------------
+
+.. automodule:: traceHMM.update
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 
