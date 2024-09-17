@@ -1,7 +1,11 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath('../../traceHMM'))
+sys.path.insert(0, os.path.abspath("../../traceHMM/utils"))
+sys.path.insert(0, os.path.abspath("../../traceHMM"))
+sys.path.insert(0, os.path.abspath("../../"))
+sys.path.insert(0, os.path.abspath("../"))
+sys.path.insert(0, os.path.abspath("."))
 
 # -- Project information ----------------------------------------
 
@@ -22,7 +26,7 @@ version = '0.0.0'
 #     "seaborn",
 #     "pybind11",
 #     "pytest",
-#     "cpp"
+#     "cxwpp"
 # ]
 
 source_suffix = {
