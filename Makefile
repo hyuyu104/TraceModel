@@ -21,6 +21,7 @@ gitAdd:
 	git add Makefile
 	git add README.md
 	git add pyproject.toml
+	git add setup.py
 	git add .readthedocs.yaml
 	git add LICENSE
 	git add notebooks

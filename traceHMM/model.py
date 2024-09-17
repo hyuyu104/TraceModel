@@ -5,7 +5,7 @@ from collections import deque
 from itertools import product
 import numpy as np
 from scipy import stats
-from .cpp.update import (
+from .update import (
     scaled_forward, 
     scaled_backward,
     calculate_v

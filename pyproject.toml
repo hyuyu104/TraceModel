@@ -1,5 +1,8 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = [
+    "setuptools>=61.0", 
+    "pybind11>=2.13.5"
+]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -37,3 +40,12 @@ dependencies = [
 [tool.setuptools]
 packages = ["traceHMM"]
 py-modules = ["__init__"]
+
+[tool.ruff.lint]
+extend-select = [
+  "B",   # flake8-bugbear
+  "I",   # isort
+  "PGH", # pygrep-hooks
+  "RUF", # Ruff-specific
+  "UP",  # pyupgrade
+]
