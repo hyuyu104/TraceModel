@@ -2,6 +2,8 @@ sphinx==7.1.2
 myst-parser
 furo
 sphinxcontrib-napoleon
+ipython
+pygments
 numpy>=1.26.4
 pandas>=2.2.1
 scipy>=1.12.0
