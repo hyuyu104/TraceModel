@@ -27,7 +27,7 @@ version = '0.0.0'
 #     "cxwpp"
 # ]
 
-autodoc_mock_imports = [ "update", "cpp" ]
+autodoc_mock_imports = [ "traceHMM.update" ]
 
 source_suffix = {
     ".rst": "restructuredtext", 
