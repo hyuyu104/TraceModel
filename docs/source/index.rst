@@ -7,10 +7,11 @@ Inference of chromatin loop status from live cell imaging data
    markdown/install
 
 .. toctree::
-   :caption: Analysis
-   :maxdepth: 0
+   :caption: Jupyter Notebooks
+   :maxdepth: 2
 
    jupyter/gabriele_et_al
+   jupyter/simulations
 
 
 .. toctree::

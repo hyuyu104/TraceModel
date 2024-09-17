@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 import seaborn as sns
-from .utils import stationary_dist
+from .func import stationary_dist
 
 import matplotlib as mpl
 # remove the top and right spines

@@ -202,9 +202,11 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="markdown/install.html">Installation</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Analysis</span></p>
+<p class="caption" role="heading"><span class="caption-text">Jupyter Notebooks</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="jupyter/gabriele_et_al.html">Loop state inference for <em>Fbn2</em> TAD in mESCs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jupyter/simulations.html">Notations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jupyter/simulations.html#ignore-the-localization-error">Ignore the localization error</a></li>
 </ul>
 <ul class="current">
 <li class="toctree-l1 current has-children"><a class="reference internal" href="api.html">API Reference</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of API Reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
@@ -265,14 +267,14 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="traceHMM.utils.html">traceHMM.utils package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="traceHMM.utils.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="traceHMM.utils.html#module-traceHMM.utils.func">traceHMM.utils.func module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="traceHMM.utils.html#traceHMM.utils.func.ffill"><code class="docutils literal notranslate"><span class="pre">ffill()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="traceHMM.utils.html#traceHMM.utils.func.stationary_dist"><code class="docutils literal notranslate"><span class="pre">stationary_dist()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="traceHMM.utils.html#module-traceHMM.utils.plot">traceHMM.utils.plot module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="traceHMM.utils.html#traceHMM.utils.plot.plot_trace"><code class="docutils literal notranslate"><span class="pre">plot_trace()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="traceHMM.utils.html#traceHMM.utils.plot.plot_transition_matrix"><code class="docutils literal notranslate"><span class="pre">plot_transition_matrix()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="traceHMM.utils.html#module-traceHMM.utils.utils">traceHMM.utils.utils module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="traceHMM.utils.html#traceHMM.utils.utils.ffill"><code class="docutils literal notranslate"><span class="pre">ffill()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="traceHMM.utils.html#traceHMM.utils.utils.stationary_dist"><code class="docutils literal notranslate"><span class="pre">stationary_dist()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="traceHMM.utils.html#module-traceHMM.utils">Module contents</a></li>
@@ -289,20 +291,24 @@
 <p>The TraceModel class and a simulator for Markov chains.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="traceHMM.model.TraceModel">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">traceHMM.model.</span></span><span class="sig-name descname"><span class="pre">TraceModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">X:</span> <span class="pre">~numpy.ndarray,</span> <span class="pre">Pm:</span> <span class="pre">~numpy.ndarray,</span> <span class="pre">dist_params:</span> <span class="pre">tuple[dict,</span> <span class="pre">...],</span> <span class="pre">dist_type=&lt;scipy.stats._continuous_distns.norm_gen</span> <span class="pre">object&gt;</span></em><span class="sig-paren">)</span><a class="headerlink" href="#traceHMM.model.TraceModel" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">traceHMM.model.</span></span><span class="sig-name descname"><span class="pre">TraceModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">X:</span> <span class="pre">~numpy.ndarray,</span> <span class="pre">Pm:</span> <span class="pre">~numpy.ndarray,</span> <span class="pre">dist_params:</span> <span class="pre">tuple[dict,</span> <span class="pre">...],</span> <span class="pre">dist_type=&lt;scipy.stats._continuous_distns.norm_gen</span> <span class="pre">object&gt;,</span> <span class="pre">update_dist_params:</span> <span class="pre">list</span> <span class="pre">=</span> <span class="pre">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#traceHMM.model.TraceModel" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Modified hidden Markov model to infer chromatin loops.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>X</strong> (<em>(</em><em>N</em><em>, </em><em>T</em><em>) </em><em>np.ndarray</em>) – Spatial distance of N trajectories over T time points.</p></li>
+<li><p><strong>X</strong> (<em>(</em><em>N</em><em>, </em><em>T</em><em>, </em><em>D</em><em>) </em><em>np.ndarray</em>) – Input value (of D dimension) of N trajectories over T time points.</p></li>
 <li><p><strong>Pm</strong> (<em>(</em><em>S</em><em>, </em><em>S</em><em>) </em><em>np.ndarray</em>) – Initial transition matrix. Entries with negative values will be
 updated. Other entries with nonnegative values will not be updated
 and will be the same after fitting.</p></li>
 <li><p><strong>dist_params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.12)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a><em>, </em><em>...</em><em>]</em>) – Tuple of length S. Each element is a dictionary specifying the
 parameters of the distribution at each state.</p></li>
-<li><p><strong>dist_type</strong> (<em>_type_</em><em>, </em><em>optional</em>) – A distribution class that has a <cite>pdf</cite> method, by default stats.norm.
+<li><p><strong>dist_type</strong> (<em>distribution class</em><em>, </em><em>optional</em>) – A distribution class that has a <cite>pdf</cite> method, by default stats.norm.
 <cite>dist_params</cite> will be passed in as keyword arguments.</p></li>
+<li><p><strong>update_dist_params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a><em>, </em><em>optional</em>) – A list of parameters to update for the distributions at each state,
+by default None. If <cite>update_dist_params</cite> is not None, then the
+distribution class supplied must have a <cite>mle</cite> method that returns a
+dictionary with keys containing update_dist_params.</p></li>
 </ul>
 </dd>
 </dl>
@@ -344,7 +350,7 @@ and the transition matrix from the last iteration.</p>
 model. Has to be run after <cite>fit</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>X</strong> (<em>(</em><em>N'</em><em>, </em><em>T'</em><em>) </em><em>np.ndarray</em><em>, </em><em>optional</em>) – New chromatin trace to predict looping status, by default None. If
+<dd class="field-odd"><p><strong>X</strong> (<em>(</em><em>N'</em><em>, </em><em>T'</em><em>, </em><em>D</em><em>) </em><em>np.ndarray</em><em>, </em><em>optional</em>) – New chromatin trace to predict looping status, by default None. If
 None is passed, will return the predicted loop status of the input
 used to train the model.</p>
 </dd>
@@ -359,13 +365,15 @@ used to train the model.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="traceHMM.model.TraceModel.density">
-<span class="sig-name descname"><span class="pre">density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></span><a class="headerlink" href="#traceHMM.model.TraceModel.density" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></span><a class="headerlink" href="#traceHMM.model.TraceModel.density" title="Link to this definition">¶</a></dt>
 <dd><p>Calculates the probability of given observation(s) at state(s).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>state</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a><em> | </em><em>np.ndarray</em>) – A single state or an array of states to evaluate x.</p></li>
-<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a><em> | </em><em>np.ndarray</em>) – Observations. Either a number or an array.</p></li>
+<li><p><strong>x</strong> (<em>(</em><em>...</em><em>, </em><em>D</em><em>) </em><em>np.ndarray</em>) – Observations. Can be (T, D), which specifies the observations at T
+time points, or (N, T, D), which specifies the observations at T
+time points of N observations.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -394,6 +402,19 @@ this cutoff.</p></li>
 </dd></dl>
 
 <dl class="py property">
+<dt class="sig sig-object py" id="traceHMM.model.TraceModel.lklhd">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">lklhd</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><span class="pre">list</span></a></em><a class="headerlink" href="#traceHMM.model.TraceModel.lklhd" title="Link to this definition">¶</a></dt>
+<dd><p>A list of the log-likelihood of the model at each iteration.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="traceHMM.model.TraceModel.loc_err">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">loc_err</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#traceHMM.model.TraceModel.loc_err" title="Link to this definition">¶</a></dt>
+<dd><p>The estimated localization error in nm/um. Available only if
+update_dist_params contains “err”.</p>
+</dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="traceHMM.model.TraceModel.mu">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mu</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#traceHMM.model.TraceModel.mu" title="Link to this definition">¶</a></dt>
 <dd><p>Initial distribution. Initialized to be uniform in each state.</p>
@@ -403,7 +424,7 @@ this cutoff.</p></li>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="traceHMM.model.TraceSimulator">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">traceHMM.model.</span></span><span class="sig-name descname"><span class="pre">TraceSimulator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">P:</span> <span class="pre">~numpy.ndarray,</span> <span class="pre">mu:</span> <span class="pre">~numpy.ndarray,</span> <span class="pre">dist_params:</span> <span class="pre">tuple[dict,</span> <span class="pre">...],</span> <span class="pre">dist_type=&lt;scipy.stats._continuous_distns.norm_gen</span> <span class="pre">object&gt;</span></em><span class="sig-paren">)</span><a class="headerlink" href="#traceHMM.model.TraceSimulator" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">traceHMM.model.</span></span><span class="sig-name descname"><span class="pre">TraceSimulator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">P:</span> <span class="pre">~numpy.ndarray,</span> <span class="pre">mu:</span> <span class="pre">~numpy.ndarray,</span> <span class="pre">dist_params:</span> <span class="pre">tuple[dict,</span> <span class="pre">...],</span> <span class="pre">dist_type=&lt;scipy.stats._continuous_distns.norm_gen</span> <span class="pre">object&gt;,</span> <span class="pre">random_state=None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#traceHMM.model.TraceSimulator" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Simulate chromatin traces based on a Markov chain.</p>
 <dl class="field-list simple">
@@ -433,7 +454,7 @@ imaging data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>X</strong> (<em>(</em><em>...</em><em>, </em><em>T</em><em>) </em><em>np.ndarray</em>) – Input spatial distance to be masked.</p></li>
+<li><p><strong>X</strong> (<em>(</em><em>...</em><em>, </em><em>T</em><em>, </em><em>D</em><em>) </em><em>np.ndarray</em>) – Input spatial distance to be masked.</p></li>
 <li><p><strong>p_obs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a>) – The observed probability.</p></li>
 <li><p><strong>a</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a><em>, </em><em>optional</em>) – P(stay unobserved), by default 0.8. Needed as otherwise the linear
 system resulting from stationary distribution has infinite
@@ -457,7 +478,7 @@ data problem observed in real imaging data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>X</strong> (<em>(</em><em>...</em><em>, </em><em>T</em><em>) </em><em>np.ndarray</em>) – Input spatial distance to be masked.</p></li>
+<li><p><strong>X</strong> (<em>(</em><em>...</em><em>, </em><em>T</em><em>, </em><em>D</em><em>) </em><em>np.ndarray</em>) – Input spatial distance to be masked.</p></li>
 <li><p><strong>p_obs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a>) – The observed probability.</p></li>
 </ul>
 </dd>
@@ -512,7 +533,112 @@ initial distribution.</p>
 element is the spatial distance generated at each time point.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.12)">tuple</a>[(T) np.ndarray, (T) np.ndarray]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.12)">tuple</a>[(T) np.ndarray, (T, D) np.ndarray]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="traceHMM.model.multivariate_chisq">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">traceHMM.model.</span></span><span class="sig-name descname"><span class="pre">multivariate_chisq</span></span><a class="headerlink" href="#traceHMM.model.multivariate_chisq" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Multivariate independent chi-square distribution.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="traceHMM.model.multivariate_chisq.pdf">
+<span class="sig-name descname"><span class="pre">pdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scales</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></span><a class="headerlink" href="#traceHMM.model.multivariate_chisq.pdf" title="Link to this definition">¶</a></dt>
+<dd><p>Independent scaled Chi-squared distributions each with a degree of
+freedom of one.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>np.ndarray</em>) – Single observations or observations in ndarrays. The last axis has
+the same dimension as the length of scales.</p></li>
+<li><p><strong>scales</strong> (<em>np.ndarray</em>) – The scale of each Chi-squared distribution. Assume the observation
+is $Y^2$, where $Y = s X$ with $X ~ N(0, 1)$. The scale is
+$s^2$.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The probability density of the observations.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)">float</a>|np.ndarray</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.12)"><strong>ValueError</strong></a> – If the shape of the last axis of <cite>X</cite> does not match <cite>scales</cite>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="traceHMM.model.multivariate_normal">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">traceHMM.model.</span></span><span class="sig-name descname"><span class="pre">multivariate_normal</span></span><a class="headerlink" href="#traceHMM.model.multivariate_normal" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Multivariate normal distribution with measurement errors.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="traceHMM.model.multivariate_normal.mle">
+<span class="sig-name descname"><span class="pre">mle</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><span class="pre">dict</span></a></span></span><a class="headerlink" href="#traceHMM.model.multivariate_normal.mle" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the updated measurement errors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tm</strong> (<a class="reference internal" href="#traceHMM.model.TraceModel" title="traceHMM.model.TraceModel"><em>TraceModel</em></a>) – Model that has gone through at least one iteration so that <cite>u</cite> and
+<cite>v</cite> are available.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary with the new measurement errors under the key <cite>err</cite>.
+The value is a list of measurement error matrix at each state.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="traceHMM.model.multivariate_normal.pdf">
+<span class="sig-name descname"><span class="pre">pdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cov</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">err</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#traceHMM.model.multivariate_normal.pdf" title="Link to this definition">¶</a></dt>
+<dd><p>PDF of multivariate normal distribution with measurement errors.
+The measurement errors are added to the diagonal of the covariance
+matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>(</em><em>...</em><em>, </em><em>D</em><em>) </em><em>np.ndarray</em>) – Observed values to evaluate the PDF.</p></li>
+<li><p><strong>cov</strong> (<em>(</em><em>D</em><em>, </em><em>D</em><em>) </em><em>np.ndarray</em>) – The base covariance.</p></li>
+<li><p><strong>err</strong> (<em>(</em><em>D</em><em>, </em><em>D</em><em>) </em><em>np.ndarray</em><em>, </em><em>optional</em>) – The measurement errors to add, by default None, treat as zeros.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>PDF computed.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="traceHMM.model.multivariate_normal.rvs">
+<span class="sig-name descname"><span class="pre">rvs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.12)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">err</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#traceHMM.model.multivariate_normal.rvs" title="Link to this definition">¶</a></dt>
+<dd><p>Generate random samples based on the covariance and measurement
+errors specified.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cov</strong> (<em>(</em><em>D</em><em>, </em><em>D</em><em>) </em><em>np.ndarray</em>) – The base covariance.</p></li>
+<li><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.12)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a><em>,</em><em>...</em><em>]</em>) – Generated sample shape. Inputted to <cite>scipy</cite>’s <cite>rvs</cite> function.</p></li>
+<li><p><strong>err</strong> (<em>(</em><em>D</em><em>, </em><em>D</em><em>) </em><em>np.ndarray</em><em>, </em><em>optional</em>) – The measurement errors to add, by default None, treat as zeros.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Generated random samples of shape (size, D).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
 </dd>
 </dl>
 </dd></dl>
@@ -593,6 +719,8 @@ element is the spatial distance generated at each time point.</p>
 <li><a class="reference internal" href="#traceHMM.model.TraceModel.decode"><code class="docutils literal notranslate"><span class="pre">TraceModel.decode()</span></code></a></li>
 <li><a class="reference internal" href="#traceHMM.model.TraceModel.density"><code class="docutils literal notranslate"><span class="pre">TraceModel.density()</span></code></a></li>
 <li><a class="reference internal" href="#traceHMM.model.TraceModel.fit"><code class="docutils literal notranslate"><span class="pre">TraceModel.fit()</span></code></a></li>
+<li><a class="reference internal" href="#traceHMM.model.TraceModel.lklhd"><code class="docutils literal notranslate"><span class="pre">TraceModel.lklhd</span></code></a></li>
+<li><a class="reference internal" href="#traceHMM.model.TraceModel.loc_err"><code class="docutils literal notranslate"><span class="pre">TraceModel.loc_err</span></code></a></li>
 <li><a class="reference internal" href="#traceHMM.model.TraceModel.mu"><code class="docutils literal notranslate"><span class="pre">TraceModel.mu</span></code></a></li>
 </ul>
 </li>
@@ -603,6 +731,16 @@ element is the spatial distance generated at each time point.</p>
 <li><a class="reference internal" href="#traceHMM.model.TraceSimulator.mu"><code class="docutils literal notranslate"><span class="pre">TraceSimulator.mu</span></code></a></li>
 <li><a class="reference internal" href="#traceHMM.model.TraceSimulator.simulate_multiple_traces"><code class="docutils literal notranslate"><span class="pre">TraceSimulator.simulate_multiple_traces()</span></code></a></li>
 <li><a class="reference internal" href="#traceHMM.model.TraceSimulator.simulate_single_trace"><code class="docutils literal notranslate"><span class="pre">TraceSimulator.simulate_single_trace()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#traceHMM.model.multivariate_chisq"><code class="docutils literal notranslate"><span class="pre">multivariate_chisq</span></code></a><ul>
+<li><a class="reference internal" href="#traceHMM.model.multivariate_chisq.pdf"><code class="docutils literal notranslate"><span class="pre">multivariate_chisq.pdf()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#traceHMM.model.multivariate_normal"><code class="docutils literal notranslate"><span class="pre">multivariate_normal</span></code></a><ul>
+<li><a class="reference internal" href="#traceHMM.model.multivariate_normal.mle"><code class="docutils literal notranslate"><span class="pre">multivariate_normal.mle()</span></code></a></li>
+<li><a class="reference internal" href="#traceHMM.model.multivariate_normal.pdf"><code class="docutils literal notranslate"><span class="pre">multivariate_normal.pdf()</span></code></a></li>
+<li><a class="reference internal" href="#traceHMM.model.multivariate_normal.rvs"><code class="docutils literal notranslate"><span class="pre">multivariate_normal.rvs()</span></code></a></li>
 </ul>
 </li>
 </ul>

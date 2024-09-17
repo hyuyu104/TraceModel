@@ -83,7 +83,48 @@ py::array_t<double> scaled_backward(
     return barr;
 }
 
+
+py::array_t<double> calculate_v(
+    const py::array_t<double> density,
+    const py::array_t<double> fval,
+    const py::array_t<double> bval,
+    const py::array_t<double> alphaval,
+    const py::array_t<double> transmat,
+    int N, int T, int S
+) {
+    auto den = density.unchecked<3>(); // N x T x S
+    auto P = transmat.unchecked<2>(); // S x S
+    auto f = fval.unchecked<3>(); // N x T x S
+    auto b = bval.unchecked<3>(); // N x T x S
+    auto alpha = alphaval.unchecked<2>(); // N x T
+
+    // v of shape N x T x S x S
+    py::array_t<double> vval({N, T, S, S});
+    auto v = vval.mutable_unchecked<4>();
+
+    for (int t = 1; t < T; ++t) {
+        for (int n = 0; n < N; ++n) {
+            double denominator = .0;
+            for (int s = 0; s < S; ++s) {
+                denominator += f(n, t, s)*b(n, t, s);
+            }
+            // the last term was not canceled
+            denominator *= alpha(n, t);
+            double numerator;
+            for (int s1 = 0; s1 < S; ++s1) {
+                for (int s2 = 0; s2 < S; ++s2) {
+                    numerator = f(n, t-1, s1)*P(s1, s2)*den(s2, n, t)*b(n, t, s2);
+                    v(n, t, s1, s2) = numerator/denominator;
+                }
+            }
+        }
+    }
+    return vval;
+}
+
+
 PYBIND11_MODULE(update, m) {
     m.def("scaled_forward", &scaled_forward, "Scaled forward algorithm.");
     m.def("scaled_backward", &scaled_backward, "Scaled backward algorithm.");
+    m.def("calculate_v", &calculate_v, "Calculate conditional expectation (v).");
 }

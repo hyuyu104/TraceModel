@@ -202,9 +202,11 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="markdown/install.html">Installation</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Analysis</span></p>
+<p class="caption" role="heading"><span class="caption-text">Jupyter Notebooks</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="jupyter/gabriele_et_al.html">Loop state inference for <em>Fbn2</em> TAD in mESCs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jupyter/simulations.html">Notations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jupyter/simulations.html#ignore-the-localization-error">Ignore the localization error</a></li>
 </ul>
 <ul class="current">
 <li class="toctree-l1 current has-children"><a class="reference internal" href="api.html">API Reference</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of API Reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
@@ -262,6 +264,57 @@
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
 </section>
+<section id="module-traceHMM.utils.func">
+<span id="tracehmm-utils-func-module"></span><h2>traceHMM.utils.func module<a class="headerlink" href="#module-traceHMM.utils.func" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="traceHMM.utils.func.ffill">
+<span class="sig-prename descclassname"><span class="pre">traceHMM.utils.func.</span></span><span class="sig-name descname"><span class="pre">ffill</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tracj_id_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'ffill'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#traceHMM.utils.func.ffill" title="Link to this definition">¶</a></dt>
+<dd><p>Fill missing spatial distance with the immediate available value that
+precedes it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – Input dataframe with missing rows or rows with NaNs.</p></li>
+<li><p><strong>tracj_id_col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The column name of trajectory id.</p></li>
+<li><p><strong>time_col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The column name of time.</p></li>
+<li><p><strong>dist_col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The column name of spatial distance.</p></li>
+<li><p><strong>method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, </em><em>optional</em>) – Tilling method, by default “ffill”. Passed to pd.reindex function.</p></li>
+<li><p><strong>limit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a><em>, </em><em>optional</em>) – How many values before the missing are checked, by default None.
+Passed to pd.reindex function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Output dataframe with all missing spatial distance filled by their
+preceding values.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="traceHMM.utils.func.stationary_dist">
+<span class="sig-prename descclassname"><span class="pre">traceHMM.utils.func.</span></span><span class="sig-name descname"><span class="pre">stationary_dist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">P</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#traceHMM.utils.func.stationary_dist" title="Link to this definition">¶</a></dt>
+<dd><p>Find the stationary distribution of a transition matrix. Calculate the
+eigenvector of P’ with corresponding eigenvalue being one.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>P</strong> (<em>(</em><em>S</em><em>, </em><em>S</em><em>) </em><em>np.ndarray</em>) – Input transition matrix.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Stationary distribution.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ol class="upperalpha simple" start="19">
+<li><p>np.ndarray</p></li>
+</ol>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
 <section id="module-traceHMM.utils.plot">
 <span id="tracehmm-utils-plot-module"></span><h2>traceHMM.utils.plot module<a class="headerlink" href="#module-traceHMM.utils.plot" title="Link to this heading">¶</a></h2>
 <dl class="py function">
@@ -304,57 +357,6 @@ default None.</p></li>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>plt.figure</p>
-</dd>
-</dl>
-</dd></dl>
-
-</section>
-<section id="module-traceHMM.utils.utils">
-<span id="tracehmm-utils-utils-module"></span><h2>traceHMM.utils.utils module<a class="headerlink" href="#module-traceHMM.utils.utils" title="Link to this heading">¶</a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="traceHMM.utils.utils.ffill">
-<span class="sig-prename descclassname"><span class="pre">traceHMM.utils.utils.</span></span><span class="sig-name descname"><span class="pre">ffill</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tracj_id_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'ffill'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#traceHMM.utils.utils.ffill" title="Link to this definition">¶</a></dt>
-<dd><p>Fill missing spatial distance with the immediate available value that
-precedes it.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – Input dataframe with missing rows or rows with NaNs.</p></li>
-<li><p><strong>tracj_id_col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The column name of trajectory id.</p></li>
-<li><p><strong>time_col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The column name of time.</p></li>
-<li><p><strong>dist_col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The column name of spatial distance.</p></li>
-<li><p><strong>method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, </em><em>optional</em>) – Tilling method, by default “ffill”. Passed to pd.reindex function.</p></li>
-<li><p><strong>limit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a><em>, </em><em>optional</em>) – How many values before the missing are checked, by default None.
-Passed to pd.reindex function.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Output dataframe with all missing spatial distance filled by their
-preceding values.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>pd.DataFrame</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="traceHMM.utils.utils.stationary_dist">
-<span class="sig-prename descclassname"><span class="pre">traceHMM.utils.utils.</span></span><span class="sig-name descname"><span class="pre">stationary_dist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">P</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#traceHMM.utils.utils.stationary_dist" title="Link to this definition">¶</a></dt>
-<dd><p>Find the stationary distribution of a transition matrix. Calculate the
-eigenvector of P’ with corresponding eigenvalue being one.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>P</strong> (<em>(</em><em>S</em><em>, </em><em>S</em><em>) </em><em>np.ndarray</em>) – Input transition matrix.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Stationary distribution.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><ol class="upperalpha simple" start="19">
-<li><p>np.ndarray</p></li>
-</ol>
-</p>
 </dd>
 </dl>
 </dd></dl>
@@ -414,14 +416,14 @@ eigenvector of P’ with corresponding eigenvalue being one.</p>
             <ul>
 <li><a class="reference internal" href="#">traceHMM.utils package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-traceHMM.utils.func">traceHMM.utils.func module</a><ul>
+<li><a class="reference internal" href="#traceHMM.utils.func.ffill"><code class="docutils literal notranslate"><span class="pre">ffill()</span></code></a></li>
+<li><a class="reference internal" href="#traceHMM.utils.func.stationary_dist"><code class="docutils literal notranslate"><span class="pre">stationary_dist()</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#module-traceHMM.utils.plot">traceHMM.utils.plot module</a><ul>
 <li><a class="reference internal" href="#traceHMM.utils.plot.plot_trace"><code class="docutils literal notranslate"><span class="pre">plot_trace()</span></code></a></li>
 <li><a class="reference internal" href="#traceHMM.utils.plot.plot_transition_matrix"><code class="docutils literal notranslate"><span class="pre">plot_transition_matrix()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#module-traceHMM.utils.utils">traceHMM.utils.utils module</a><ul>
-<li><a class="reference internal" href="#traceHMM.utils.utils.ffill"><code class="docutils literal notranslate"><span class="pre">ffill()</span></code></a></li>
-<li><a class="reference internal" href="#traceHMM.utils.utils.stationary_dist"><code class="docutils literal notranslate"><span class="pre">stationary_dist()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#module-traceHMM.utils">Module contents</a></li>

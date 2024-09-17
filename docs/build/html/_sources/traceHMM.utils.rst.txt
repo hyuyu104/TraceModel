@@ -4,18 +4,18 @@ traceHMM.utils package
 Submodules
 ----------
 
-traceHMM.utils.plot module
+traceHMM.utils.func module
 --------------------------
 
-.. automodule:: traceHMM.utils.plot
+.. automodule:: traceHMM.utils.func
    :members:
    :undoc-members:
    :show-inheritance:
 
-traceHMM.utils.utils module
----------------------------
+traceHMM.utils.plot module
+--------------------------
 
-.. automodule:: traceHMM.utils.utils
+.. automodule:: traceHMM.utils.plot
    :members:
    :undoc-members:
    :show-inheritance:

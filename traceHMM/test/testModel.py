@@ -1,5 +1,6 @@
 import unittest
 from collections import deque
+from itertools import product
 import numpy as np
 from scipy import stats
 from traceHMM import model
@@ -65,6 +66,17 @@ def scaled_backward(X, tm):
                     ])
             b[n,t,:] = b[n,t,:]/sum(b[n,t,:])
     return b
+
+def calculate_v_arr(X, tm):
+    v = np.zeros((tm._N, tm._T, tm._S, tm._S))
+    states = np.arange(tm._S)
+    for s1, s2 in product(states, states):
+        for t in range(1, tm._T):
+            den = tm.density(s2, X[:,t])
+            raw = den*tm._b[:,t,s2]*tm._f[:,t-1,s1]*tm._P[s1,s2]
+            frac = np.sum(tm._f[:,t,:]*tm._b[:,t,:], axis=1)*tm._alpha[:,t]
+            v[:,t,s1,s2] = raw/frac
+    return v
 
 
 def log_viterbi(x, tm):

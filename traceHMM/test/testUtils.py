@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import pytest
-from traceHMM.utils.utils import stationary_dist
+from traceHMM.utils.func import stationary_dist
 
 
 def test_stationary_dist1():

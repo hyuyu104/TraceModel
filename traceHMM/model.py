@@ -5,7 +5,11 @@ from collections import deque
 from itertools import product
 import numpy as np
 from scipy import stats
-from .cpp.update import scaled_forward, scaled_backward # type: ignore
+from .cpp.update import (
+    scaled_forward, 
+    scaled_backward,
+    calculate_v
+) # type: ignore
 
 class TraceModel:
     """Modified hidden Markov model to infer chromatin loops.
@@ -21,16 +25,22 @@ class TraceModel:
         dist_params : tuple[dict, ...]
             Tuple of length S. Each element is a dictionary specifying the 
             parameters of the distribution at each state.
-        dist_type : _type_, optional
+        dist_type : distribution class, optional
             A distribution class that has a `pdf` method, by default stats.norm. 
             `dist_params` will be passed in as keyword arguments.
+        update_dist_params : list, optional
+            A list of parameters to update for the distributions at each state,
+            by default None. If `update_dist_params` is not None, then the 
+            distribution class supplied must have a `mle` method that returns a 
+            dictionary with keys containing update_dist_params.
     """
     def __init__(
             self, 
             X:np.ndarray,
             Pm:np.ndarray,
             dist_params:tuple[dict, ...],
-            dist_type=stats.norm
+            dist_type=stats.norm,
+            update_dist_params:list=None,
     ):
         self._N, self._T, self._D = X.shape
         self._S = Pm.shape[0]
@@ -40,6 +50,7 @@ class TraceModel:
         self._convergence = []
         self._lklhd = []
         self._m = np.where(Pm < 0)
+        self._update_dist_params = update_dist_params
 
         # expect row sum except the fixed entries
         self._l = 1 - np.sum(np.where(Pm < 0, 0, Pm), axis=1)
@@ -107,6 +118,13 @@ class TraceModel:
         """A list of the log-likelihood of the model at each iteration.
         """
         return self._lklhd
+    
+    @property
+    def loc_err(self) -> np.ndarray:
+        """The estimated localization error in nm/um. Available only if 
+        update_dist_params contains "err".
+        """
+        return np.sqrt(np.diag(self._dist_params[0]["err"])/2)
 
     def density(
             self, 
@@ -161,15 +179,12 @@ class TraceModel:
         self._u = u
 
     def _calculate_v_(self, X:np.ndarray):
-        v = np.zeros((self._N, self._T, self._S, self._S))
-        states = np.arange(self._S)
-        for s1, s2 in product(states, states):
-            for t in range(1, self._T):
-                den = self.density(s2, X[:,t])
-                raw = den*self._b[:,t,s2]*self._f[:,t-1,s1]*self._P[s1,s2]
-                frac = np.sum(self._f[:,t,:]*self._b[:,t,:], axis=1)*self._alpha[:,t]
-                v[:,t,s1,s2] = raw/frac
-        self._v = v
+        self._v = calculate_v(
+            self.density(np.arange(self._S), X),
+            self._f, self._b, self._alpha, 
+            self._P,
+            self._N, self._T, self._S
+        )
 
     def _update_params_(self):
         # update the initial distribution
@@ -186,6 +201,13 @@ class TraceModel:
             b = np.sum(self._v[:,1:,s1,s2s])
 
             P_hat[s1,s2] = self._l[s1]*a/b
+            
+        # update distribution parameters, if required
+        if self._update_dist_params is not None:
+            new_params = self._dist_type.mle(self)
+            for param in self._update_dist_params:
+                for i in range(len(self._dist_params)):
+                    self._dist_params[i][param] = new_params[param][i]
 
         self._convergence.append(np.mean(np.abs(P_hat - self._P)[self._m]))
         # update P after calculating the mean absolute error
@@ -277,12 +299,15 @@ class TraceSimulator:
             P:np.ndarray,
             mu:np.ndarray,
             dist_params:tuple[dict, ...],
-            dist_type=stats.norm
+            dist_type=stats.norm,
+            random_state=None
     ):
         self._P = P
         self._mu = mu
         self._dist_params = dist_params
         self._dist_type = dist_type
+        if random_state is not None:
+            np.random.seed(random_state)
         
     @property
     def P(self) -> np.ndarray:
@@ -307,7 +332,7 @@ class TraceSimulator:
 
         Returns
         -------
-        tuple[(T) np.ndarray, (T) np.ndarray]
+        tuple[(T) np.ndarray, (T, D) np.ndarray]
             The first element is the true loop status of the trace. The second
             element is the spatial distance generated at each time point.
         """
@@ -316,11 +341,13 @@ class TraceSimulator:
             H.append(np.random.choice(len(self._mu), p=self._P[H[-1]]))
         H = np.array(H)
         
-        X = np.zeros_like(H)
+        xs = []
         for s in range(len(self._mu)):
             args = self._dist_params[s]
-            x = self._dist_type.rvs(**args, size=T)
-            X = np.where(H==s, x, X)
+            xs.append(self._dist_type.rvs(**args, size=T))
+        X = np.zeros_like(xs[-1])
+        for s in range(len(self._mu)):
+            X[np.where(H==s)] = xs[s][np.where(H==s)]
         return H, X
     
     def simulate_multiple_traces(
@@ -342,11 +369,13 @@ class TraceSimulator:
             The first element is the true loop status of the trace. The second
             element is the spatial distance generated at each time point.
         """
-        result =  np.stack([
-            self.simulate_single_trace(T) for _ in range(N)
-        ])
-        H = result[:,0,:].astype("int64")
-        X = result[:,1,:]
+        H, X = [], []
+        for _ in range(N):
+            h, x = self.simulate_single_trace(T)
+            H.append(h)
+            X.append(x)
+        H = np.stack(H)
+        X = np.stack(X)
         return H, X
     
     @staticmethod
@@ -358,7 +387,7 @@ class TraceSimulator:
 
         Parameters
         ----------
-        X : (..., T) np.ndarray
+        X : (..., T, D) np.ndarray
             Input spatial distance to be masked.
         p_obs : float
             The observed probability.
@@ -369,7 +398,8 @@ class TraceSimulator:
             Same shape as `X` with missing observations filled by NaN.
         """
         mask = np.random.choice(2, size=X.shape, p=[1 - p_obs, p_obs])
-        masked_X = np.where(mask==0, np.nan, X)
+        masked_X = X.copy()
+        masked_X[np.where(mask==0)] = np.nan
         return masked_X
     
     def mask_by_markov_chain(
@@ -381,7 +411,7 @@ class TraceSimulator:
 
         Parameters
         ----------
-        X : (..., T) np.ndarray
+        X : (..., T, D) np.ndarray
             Input spatial distance to be masked.
         p_obs : float
             The observed probability.
@@ -402,12 +432,19 @@ class TraceSimulator:
             [1 - b, b]
         ])
         mu = np.array([1 - p_obs, p_obs])
-        mc = TraceSimulator(P, mu, self._dist_params)
-        mask = mc.simulate_multiple_traces(X.shape[1], X.shape[0])[0]
-        return np.where(mask==0, np.nan, X)
+        mc = TraceSimulator(
+            P, mu, self._dist_params, self._dist_type
+        )
+        mask = mc.simulate_multiple_traces(
+            X.shape[1], X.shape[0]
+        )[0]
+        masked_X = X.copy()
+        masked_X[np.where(mask==0)] = np.nan
+        return masked_X
 
 
 class multivariate_chisq:
+    """Multivariate independent chi-square distribution."""
     def pdf(X:np.ndarray, scales:np.ndarray) -> float|np.ndarray:
         """Independent scaled Chi-squared distributions each with a degree of 
         freedom of one.
@@ -439,3 +476,88 @@ class multivariate_chisq:
         for i, scale in enumerate(scales):
             vals.append(stats.chi2.pdf(X[...,i]/scale, df=1)/scale)
         return np.prod(vals, axis=0)
+    
+    
+class multivariate_normal:
+    """Multivariate normal distribution with measurement errors."""
+    def pdf(
+        X:np.ndarray,
+        cov:np.ndarray,
+        err:np.ndarray=None,
+        **kwargs
+    ) -> np.ndarray:
+        """PDF of multivariate normal distribution with measurement errors.
+        The measurement errors are added to the diagonal of the covariance
+        matrix.
+
+        Parameters
+        ----------
+        X : (..., D) np.ndarray
+            Observed values to evaluate the PDF.
+        cov : (D, D) np.ndarray
+            The base covariance.
+        err : (D, D) np.ndarray, optional
+            The measurement errors to add, by default None, treat as zeros.
+
+        Returns
+        -------
+        np.ndarray
+            PDF computed.
+        """
+        if err is not None:
+            cov = cov + err
+        return stats.multivariate_normal.pdf(X, cov=cov, **kwargs)
+    
+    def rvs(
+        cov:np.ndarray, 
+        size:tuple[int,...], 
+        err:np.ndarray=None, 
+        **kwargs
+    ) -> np.ndarray:
+        """Generate random samples based on the covariance and measurement
+        errors specified.
+
+        Parameters
+        ----------
+        cov : (D, D) np.ndarray
+            The base covariance.
+        size : tuple[int,...]
+            Generated sample shape. Inputted to `scipy`'s `rvs` function.
+        err : (D, D) np.ndarray, optional
+            The measurement errors to add, by default None, treat as zeros.
+
+        Returns
+        -------
+        np.ndarray
+            Generated random samples of shape (size, D).
+        """
+        if err is not None:
+            cov = cov + err
+        return stats.multivariate_normal.rvs(cov=cov, size=size, **kwargs)
+    
+    def mle(tm:TraceModel) -> dict:
+        """Calculate the updated measurement errors.
+
+        Parameters
+        ----------
+        tm : TraceModel
+            Model that has gone through at least one iteration so that `u` and
+            `v` are available.
+
+        Returns
+        -------
+        dict
+            A dictionary with the new measurement errors under the key `err`.
+            The value is a list of measurement error matrix at each state.
+        """
+        l_sqs = []
+        for d in range(tm._X.shape[-1]):
+            a, b = 0, 0
+            for s in range(tm.S):
+                s_sq = tm._dist_params[s]["cov"][d,d]
+                a += np.nansum(tm._u[...,s]*(np.square(tm._X[...,d]) - s_sq))
+                b += np.sum(tm._u[...,s][~np.isnan(tm._X[...,0])])
+            l_sqs.append(a/b)
+        L = np.diag(np.where(np.array(l_sqs) < 0, 0, l_sqs))
+        param = {"err":[L.copy() for _ in range(tm.S)]}
+        return param

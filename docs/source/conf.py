@@ -14,16 +14,16 @@ version = '0.0.0'
 
 # -- General configuration --------------------------------------
 
-autodoc_mock_imports = [
-    "numpy",
-    "pandas",
-    "scipy",
-    "matplotlib",
-    "seaborn",
-    "pybind11",
-    "pytest",
-    "cpp"
-]
+# autodoc_mock_imports = [
+#     "numpy",
+#     "pandas",
+#     "scipy",
+#     "matplotlib",
+#     "seaborn",
+#     "pybind11",
+#     "pytest",
+#     "cpp"
+# ]
 
 source_suffix = {
     ".rst": "restructuredtext", 
