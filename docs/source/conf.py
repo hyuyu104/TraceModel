@@ -17,17 +17,8 @@ version = '0.0.0'
 
 # -- General configuration --------------------------------------
 
-# autodoc_mock_imports = [
-#     "numpy",
-#     "pandas",
-#     "scipy",
-#     "matplotlib",
-#     "seaborn",
-#     "pybind11",
-#     "pytest",
-#     "cxwpp"
-# ]
-
+# update is a cpp module, cannot be imported properly
+# temporary fix, raised a warning but won't affect build
 autodoc_mock_imports = [ "traceHMM.update" ]
 
 source_suffix = {
@@ -38,7 +29,6 @@ source_suffix = {
 extensions = [
     'sphinx.ext.duration',
     'sphinx.ext.doctest',
-    # 'autoapi.extension',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.intersphinx',

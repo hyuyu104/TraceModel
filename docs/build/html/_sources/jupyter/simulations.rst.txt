@@ -1,3 +1,6 @@
+Demo: simulate a live cell imaging dataset
+==========================================
+
 .. code:: ipython3
 
     import os
@@ -14,74 +17,46 @@
     %reload_ext autoreload
     %autoreload 2
 
-Notations
-~~~~~~~~~
+Test traceHMM implementation with simulated data
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Let :math:`\mathbf X \in \mathbb R^{N\times T}` denote the spatial
-distance between two loci. The :math:`nt`\ th entry of
-:math:`\mathbf X`, denoted by :math:`X_t^n`, represents the spatial
-distance of the :math:`n`\ th trace at timepoint :math:`t`. Define the
-notation for hidden state similarly as
-:math:`\mathbf H \in \mathbb R^{N\times T}` and :math:`H_t^n`. In this
-section, we assume the Markov chain jumps between :math:`S` states, so
-:math:`H_t^n \in \{1, ..., S\}`. In our paper, we assume :math:`S = 3`,
-but the model works for arbitrary number of states. Further, we define
-:math:`m_t^n \in \{1, 0\}` to indicate whether :math:`X_t^n` is observed
-(:math:`m_t^n = 1` if :math:`X_t^n` is observed, otherwise :math:`0`).
+Here, we generate a simulated live cell imaging data using the
+``TraceSimulator`` class in the ``traceHMM`` package. The transition
+probability and the covariance matrices are listed below.
 
-We further define the PDF of spatial distance :math:`x` at state
-:math:`s \in \{1, ..., S\}` as :math:`f_s(x)`. For the Markov chain,
-define the initial distribution and transition probability as
+We also want to simulate the missing data observed in typical live cell
+imaging data. ``TraceSimulator`` class provides two methods to simulate
+missing data:
 
-.. math::
+1. Mask completely at random: at each time point, generate a 0-1 random
+   variable. Mask the value if the random variable is 0.
 
+2. Mask by a Markov chain: generate a 0-1 Markov chain to mask the
+   generated data. To compute the transition matrix of this chain given
+   desired observed probability, one also needs to specify
+   :math:`\mathbb P(\text{stay unobserved})`, which fixes one element of
+   the transition matrix and ensures a unique solution exists.
 
-   \vec\mu = \begin{bmatrix}
-   \mathbb P(H_1 = 1) \\ \cdots \\ \mathbb P(H_1 = S)
-   \end{bmatrix}\qquad\text{and}\qquad
-   \mathbf P = 
-   \begin{bmatrix}
-   \mathbb P(H_{t+1} = 1|H_t = 1) & \mathbb P(H_{t+1} = 2|H_t = 1) & \cdots \\
-   \mathbb P(H_{t+1} = 1|H_t = 2) & \mathbb P(H_{t+1} = 2|H_t = 2) & \cdots \\
-   \vdots & \vdots & \ddots
-   \end{bmatrix}
-
-We write :math:`\mathbb P(H_1 = s)` as :math:`\mu(s)` and
-:math:`\mathbb P(H_{t+1} = s_2|H_t = s_1)` as :math:`P(s_1, s_2)` to
-abbreviate the notations.
-
-In our model, we assume :math:`f_s(x)` is known before fitting the HMM,
-so the parameters of :math:`f_s(x)` are not updated. This allows
-pre-specified values for the looped and unlooped status. For example,
-one can fix the loop state mean to :math:`200`\ nm to ensure consistent
-prediction of loop state across different datasets. In the end, the
-fitting procedure described below is used to determine :math:`\vec\mu`
-and :math:`\mathbf P` only. This reduction of estimable parameters also
-facilitates stable estimation across different runs.
-
-In addition, we allow some entries of the transition matrix to be fixed.
-For example, one can fix :math:`P(1, 3) = 0`, which means the loop state
-cannot jump directly to the unloop state but must pass through the
-intermediate state first. This additional flexibility makes it possible
-to incorporate more biological background to the model, thus improving
-prediction results.
-
-Test by Simulations
--------------------
+Here, we demonstrate the second approach and generate 400 traces each of
+length 500.
 
 .. code:: ipython3
 
+    # transition probability between three states
     P = np.array([
         [0.95, 0.05,    0],
         [0.02, 0.96, 0.02],
         [   0, 0.05, 0.95]
     ])
+    # measurement errors added to x, y, and z axes
     err = np.diag(np.square([0.06, 0.06, .12])*2)
+    # variance at each state
     dist_params = (
             {"cov":np.diag(np.ones(3)*0.015), "err":err},
             {"cov":np.diag(np.ones(3)*0.055), "err":err},
             {"cov":np.diag(np.ones(3)*0.085), "err":err}
     )
+    # a uniform initial distribution over the 3 states
     tse = trm.TraceSimulator(
         P=P,
         mu=np.array([1/3, 1/3, 1/3]),
@@ -97,6 +72,10 @@ Test by Simulations
 
     P(stay observed) = 0.8
 
+
+After generating the data, we want to check whether the model we
+implemented can estimate the parameters accurately, given that we know
+the correct variance at each state.
 
 .. code:: ipython3
 
@@ -123,6 +102,37 @@ Test by Simulations
     Converged at iteration 504
 
 
+The model converges after 504 iterations. The ``TraceModel`` class uses
+the mean absolute difference of the transition matrix between two
+iterations as the convergence criterion. The model also has a ``lklhd``
+attribute that records the log likelihood of the model at each
+iteration. From the plot below, we see that the log-likelihood is
+monotonically increasing, coherent with what we would expect from an
+expectation-maximization process.
+
+.. code:: ipython3
+
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4))
+    sns.scatterplot(tm.convergence, ax=axes[0])
+    axes[0].set(
+        xlabel="Iteration number", ylabel="Mean absolute difference",
+        title="Transition matrix by iteration", ylim=(0, 0.01)
+    )
+    sns.scatterplot(tm.lklhd, ax=axes[1])
+    axes[1].set(
+        xlabel="Iteration number", ylabel="Log likelihood",
+        title="Log likelihood by iteration"
+    )
+    plt.show()
+
+
+
+.. image:: simulations_files/simulations_8_0.png
+
+
+The estimated measurement errors are listed below, which are close to
+``[0.06, 0.06, 0.12]`` as specified in the data generation part.
+
 .. code:: ipython3
 
     tm.loc_err
@@ -136,38 +146,32 @@ Test by Simulations
 
 
 
+The estimated transition matrix is also close to the true transition
+matrix, and both give a similar stationary distribution, showing that
+the chain spends about 22% of time in the looped state in the long run.
+
 .. code:: ipython3
 
-    fig, axes = plt.subplots(1, 2, figsize=(12, 4))
-    sns.scatterplot(tm.convergence, ax=axes[0])
-    sns.scatterplot(tm.lklhd, ax=axes[1])
+    sfigs = plt.figure(figsize=(10, 4)).subfigures(1, 2)
+    tplt.plot_transition_matrix(P, sfigs[0])
+    sfigs[0].suptitle("True transition matrix")
+    tplt.plot_transition_matrix(tm.P, sfigs[1])
+    sfigs[1].suptitle("Estimated transition matrix")
 
 
 
 
 .. parsed-literal::
 
-    <Axes: >
+    Text(0.5, 0.98, 'Estimated transition matrix')
 
 
 
 
-.. image:: simulations_files/simulations_7_1.png
+.. image:: simulations_files/simulations_12_1.png
 
 
-.. code:: ipython3
-
-    fig = tplt.plot_transition_matrix(tm.P)
-    fig = tplt.plot_transition_matrix(P)
-
-
-
-.. image:: simulations_files/simulations_8_0.png
-
-
-
-.. image:: simulations_files/simulations_8_1.png
-
+Below are some traces along with their predicted/true looping profile.
 
 .. code:: ipython3
 
@@ -186,11 +190,35 @@ Test by Simulations
 
 
 
-.. image:: simulations_files/simulations_9_0.png
+.. image:: simulations_files/simulations_14_0.png
+
+
+.. code:: ipython3
+
+    n = 2
+    dist = np.linalg.norm(X[n], axis=1)
+    df = pd.DataFrame({"dist":dist, "state":tm.decode(X[[n]])[0]})
+    df = df.reset_index(names="t")
+    df["true"] = H[n]
+    code_book = {0:"looped", 1:"intermediate", 2:"unlooped"}
+    fig, axes = plt.subplots(2, 1, figsize=(16, 6))
+    tplt.plot_trace(df, "t", "dist", "state", code_book, fig, axes[0])
+    tplt.plot_trace(df, "t", "dist", "true", code_book, fig, axes[1])
+    axes[0].set(xlabel="Time (s)", ylabel="Spatial distance (µm)", title="Predicted loop states")
+    axes[1].set(xlabel="Time (s)", ylabel="Spatial distance (µm)", title="True loop states")
+    fig.tight_layout()
+
+
+
+.. image:: simulations_files/simulations_15_0.png
 
 
 Ignore the localization error
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In this section, we demonstrate why including an additional estimate for
+measurement error is helpful. Below, we fit a HMM without measurement
+error assumption:
 
 .. code:: ipython3
 
@@ -218,31 +246,51 @@ Ignore the localization error
 
 .. code:: ipython3
 
-    fig = tplt.plot_transition_matrix(tm2.P)
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4))
+    sns.scatterplot(tm2.convergence, ax=axes[0])
+    axes[0].set(
+        xlabel="Iteration number", ylabel="Mean absolute difference",
+        title="Transition matrix by iteration", ylim=(0, 0.01)
+    )
+    sns.scatterplot(tm2.lklhd, ax=axes[1])
+    axes[1].set(
+        xlabel="Iteration number", ylabel="Log likelihood",
+        title="Log likelihood by iteration"
+    )
+    plt.show()
 
 
 
-.. image:: simulations_files/simulations_12_0.png
+.. image:: simulations_files/simulations_18_0.png
 
+
+The estimated transition matrix shows considerable difference from the
+true one. In addition, with this model, we would say the long run loop
+fraction is about 11% while the true fraction is twice the estimated
+one.
 
 .. code:: ipython3
 
-    fig, axes = plt.subplots(1, 2, figsize=(12, 4))
-    sns.scatterplot(tm2.convergence, ax=axes[0])
-    sns.scatterplot(tm2.lklhd, ax=axes[1])
+    sfigs = plt.figure(figsize=(10, 4)).subfigures(1, 2)
+    tplt.plot_transition_matrix(P, sfigs[0])
+    sfigs[0].suptitle("True transition matrix")
+    tplt.plot_transition_matrix(tm2.P, sfigs[1])
+    sfigs[1].suptitle("Estimated transition matrix")
 
 
 
 
 .. parsed-literal::
 
-    <Axes: >
+    Text(0.5, 0.98, 'Estimated transition matrix')
 
 
 
 
-.. image:: simulations_files/simulations_13_1.png
+.. image:: simulations_files/simulations_20_1.png
 
+
+The estimated looping profile is also problematic, as shown below:
 
 .. code:: ipython3
 
@@ -261,6 +309,5 @@ Ignore the localization error
 
 
 
-.. image:: simulations_files/simulations_14_0.png
-
+.. image:: simulations_files/simulations_22_0.png
 

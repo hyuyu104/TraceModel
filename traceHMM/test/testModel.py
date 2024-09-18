@@ -100,6 +100,26 @@ def log_viterbi(x, tm):
     return decoded_states
 
 
+def log_viterbi_arr(x, tm):
+    v = np.zeros((len(x), tm._S))
+    varg = np.zeros((len(x), tm._S), dtype="int64")
+    states = np.arange(tm._S)
+
+    v[0] = np.log(tm.density(states, x[0])) + np.log(tm._mu)
+    for t in range(1, len(x)):
+        den = tm.density(states, x[t])
+        logP = np.where(tm._P==0, -np.inf, np.log(np.where(tm._P==0, 1, tm._P)))
+        val = v[t-1][:,None] + logP + np.log(den[None,:])
+        v[t] = np.max(val, axis=0)
+        varg[t-1] = np.argmax(val, axis=0)
+        if any(np.abs(v[t]) < 1e-10):
+            raise ValueError(f"{t} iter failed: {v[t].round(3)}")
+    print(v[:10,:])
+
+    decoded_states = deque([np.argmax(v[-1])])
+    for t in range(len(x)-2, -1, -1):
+        decoded_states.appendleft(varg[t, decoded_states[0]])
+
 
 class TestFittingTwoStates(unittest.TestCase):
 

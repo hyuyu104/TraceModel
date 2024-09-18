@@ -67,20 +67,29 @@ def plot_trace(
     return fig, ax
 
 
-def plot_transition_matrix(P:np.ndarray) -> plt.figure:
+def plot_transition_matrix(
+        P:np.ndarray, 
+        fig:plt.figure=None
+    ) -> plt.figure:
     """Plot the transition matrix along with the stationary distribution.
 
     Parameters
     ----------
     P : (S, S) np.ndarray
         Transition matrix to be plotted.
+    fig : plt.figure
+        Figure object to plot the transition matrix. Will generate a new 
+        figure if None is passed.
 
     Returns
     -------
     plt.figure
         figure object created.
     """
-    fig, (ax1, ax2) = plt.subplots(ncols=2, width_ratios=(4, 1), figsize=(5, 3))
+    if fig is None:
+        fig, (ax1, ax2) = plt.subplots(ncols=2, width_ratios=(4, 1), figsize=(5, 3))
+    else:
+        ax1, ax2 = fig.subplots(1, 2, width_ratios=(4, 1))
     nstates = len(P)
     if nstates == 2:
         labs = ["looped", "unlooped"]

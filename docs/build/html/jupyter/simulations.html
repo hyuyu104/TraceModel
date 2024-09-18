@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="API Reference" href="../api.html" /><link rel="prev" title="Loop state inference for Fbn2 TAD in mESCs" href="gabriele_et_al.html" />
 
     <!-- Generated with Sphinx 8.0.2 and Furo 2024.08.06 -->
-        <title>Notations - TraceModel 0.0 documentation</title>
+        <title>Demo: simulate a live cell imaging dataset - TraceModel 0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=302659d7" />
@@ -205,9 +205,9 @@
 <p class="caption" role="heading"><span class="caption-text">Jupyter Notebooks</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="gabriele_et_al.html">Loop state inference for <em>Fbn2</em> TAD in mESCs</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Notations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#ignore-the-localization-error">Ignore the localization error</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Demo: simulate a live cell imaging dataset</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../api.html">API Reference</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of API Reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../modules.html">traceHMM</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of traceHMM</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -259,7 +259,9 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+          <section id="demo-simulate-a-live-cell-imaging-dataset">
+<h1>Demo: simulate a live cell imaging dataset<a class="headerlink" href="#demo-simulate-a-live-cell-imaging-dataset" title="Link to this heading">¶</a></h1>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">stats</span>
@@ -273,64 +275,40 @@
 <span class="o">%</span><span class="k">autoreload</span> 2
 </pre></div>
 </div>
-<section id="notations">
-<h1>Notations<a class="headerlink" href="#notations" title="Link to this heading">¶</a></h1>
-<p>Let <span class="math notranslate nohighlight">\(\mathbf X \in \mathbb R^{N\times T}\)</span> denote the spatial
-distance between two loci. The <span class="math notranslate nohighlight">\(nt\)</span>th entry of
-<span class="math notranslate nohighlight">\(\mathbf X\)</span>, denoted by <span class="math notranslate nohighlight">\(X_t^n\)</span>, represents the spatial
-distance of the <span class="math notranslate nohighlight">\(n\)</span>th trace at timepoint <span class="math notranslate nohighlight">\(t\)</span>. Define the
-notation for hidden state similarly as
-<span class="math notranslate nohighlight">\(\mathbf H \in \mathbb R^{N\times T}\)</span> and <span class="math notranslate nohighlight">\(H_t^n\)</span>. In this
-section, we assume the Markov chain jumps between <span class="math notranslate nohighlight">\(S\)</span> states, so
-<span class="math notranslate nohighlight">\(H_t^n \in \{1, ..., S\}\)</span>. In our paper, we assume <span class="math notranslate nohighlight">\(S = 3\)</span>,
-but the model works for arbitrary number of states. Further, we define
-<span class="math notranslate nohighlight">\(m_t^n \in \{1, 0\}\)</span> to indicate whether <span class="math notranslate nohighlight">\(X_t^n\)</span> is observed
-(<span class="math notranslate nohighlight">\(m_t^n = 1\)</span> if <span class="math notranslate nohighlight">\(X_t^n\)</span> is observed, otherwise <span class="math notranslate nohighlight">\(0\)</span>).</p>
-<p>We further define the PDF of spatial distance <span class="math notranslate nohighlight">\(x\)</span> at state
-<span class="math notranslate nohighlight">\(s \in \{1, ..., S\}\)</span> as <span class="math notranslate nohighlight">\(f_s(x)\)</span>. For the Markov chain,
-define the initial distribution and transition probability as</p>
-<div class="math-wrapper docutils container">
-<div class="math notranslate nohighlight">
-\[\begin{split}\vec\mu = \begin{bmatrix}
-\mathbb P(H_1 = 1) \\ \cdots \\ \mathbb P(H_1 = S)
-\end{bmatrix}\qquad\text{and}\qquad
-\mathbf P =
-\begin{bmatrix}
-\mathbb P(H_{t+1} = 1|H_t = 1) &amp; \mathbb P(H_{t+1} = 2|H_t = 1) &amp; \cdots \\
-\mathbb P(H_{t+1} = 1|H_t = 2) &amp; \mathbb P(H_{t+1} = 2|H_t = 2) &amp; \cdots \\
-\vdots &amp; \vdots &amp; \ddots
-\end{bmatrix}\end{split}\]</div>
-</div>
-<p>We write <span class="math notranslate nohighlight">\(\mathbb P(H_1 = s)\)</span> as <span class="math notranslate nohighlight">\(\mu(s)\)</span> and
-<span class="math notranslate nohighlight">\(\mathbb P(H_{t+1} = s_2|H_t = s_1)\)</span> as <span class="math notranslate nohighlight">\(P(s_1, s_2)\)</span> to
-abbreviate the notations.</p>
-<p>In our model, we assume <span class="math notranslate nohighlight">\(f_s(x)\)</span> is known before fitting the HMM,
-so the parameters of <span class="math notranslate nohighlight">\(f_s(x)\)</span> are not updated. This allows
-pre-specified values for the looped and unlooped status. For example,
-one can fix the loop state mean to <span class="math notranslate nohighlight">\(200\)</span>nm to ensure consistent
-prediction of loop state across different datasets. In the end, the
-fitting procedure described below is used to determine <span class="math notranslate nohighlight">\(\vec\mu\)</span>
-and <span class="math notranslate nohighlight">\(\mathbf P\)</span> only. This reduction of estimable parameters also
-facilitates stable estimation across different runs.</p>
-<p>In addition, we allow some entries of the transition matrix to be fixed.
-For example, one can fix <span class="math notranslate nohighlight">\(P(1, 3) = 0\)</span>, which means the loop state
-cannot jump directly to the unloop state but must pass through the
-intermediate state first. This additional flexibility makes it possible
-to incorporate more biological background to the model, thus improving
-prediction results.</p>
-<section id="test-by-simulations">
-<h2>Test by Simulations<a class="headerlink" href="#test-by-simulations" title="Link to this heading">¶</a></h2>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+<section id="test-tracehmm-implementation-with-simulated-data">
+<h2>Test traceHMM implementation with simulated data<a class="headerlink" href="#test-tracehmm-implementation-with-simulated-data" title="Link to this heading">¶</a></h2>
+<p>Here, we generate a simulated live cell imaging data using the
+<code class="docutils literal notranslate"><span class="pre">TraceSimulator</span></code> class in the <code class="docutils literal notranslate"><span class="pre">traceHMM</span></code> package. The transition
+probability and the covariance matrices are listed below.</p>
+<p>We also want to simulate the missing data observed in typical live cell
+imaging data. <code class="docutils literal notranslate"><span class="pre">TraceSimulator</span></code> class provides two methods to simulate
+missing data:</p>
+<ol class="arabic simple">
+<li><p>Mask completely at random: at each time point, generate a 0-1 random
+variable. Mask the value if the random variable is 0.</p></li>
+<li><p>Mask by a Markov chain: generate a 0-1 Markov chain to mask the
+generated data. To compute the transition matrix of this chain given
+desired observed probability, one also needs to specify
+<span class="math notranslate nohighlight">\(\mathbb P(\text{stay unobserved})\)</span>, which fixes one element of
+the transition matrix and ensures a unique solution exists.</p></li>
+</ol>
+<p>Here, we demonstrate the second approach and generate 400 traces each of
+length 500.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># transition probability between three states</span>
+<span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
     <span class="p">[</span><span class="mf">0.95</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span>    <span class="mi">0</span><span class="p">],</span>
     <span class="p">[</span><span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.96</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">],</span>
     <span class="p">[</span>   <span class="mi">0</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">]</span>
 <span class="p">])</span>
+<span class="c1"># measurement errors added to x, y, and z axes</span>
 <span class="n">err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">([</span><span class="mf">0.06</span><span class="p">,</span> <span class="mf">0.06</span><span class="p">,</span> <span class="mf">.12</span><span class="p">])</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span>
+<span class="c1"># variance at each state</span>
 <span class="n">dist_params</span> <span class="o">=</span> <span class="p">(</span>
         <span class="p">{</span><span class="s2">&quot;cov&quot;</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="mf">0.015</span><span class="p">),</span> <span class="s2">&quot;err&quot;</span><span class="p">:</span><span class="n">err</span><span class="p">},</span>
         <span class="p">{</span><span class="s2">&quot;cov&quot;</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="mf">0.055</span><span class="p">),</span> <span class="s2">&quot;err&quot;</span><span class="p">:</span><span class="n">err</span><span class="p">},</span>
         <span class="p">{</span><span class="s2">&quot;cov&quot;</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="mf">0.085</span><span class="p">),</span> <span class="s2">&quot;err&quot;</span><span class="p">:</span><span class="n">err</span><span class="p">}</span>
 <span class="p">)</span>
+<span class="c1"># a uniform initial distribution over the 3 states</span>
 <span class="n">tse</span> <span class="o">=</span> <span class="n">trm</span><span class="o">.</span><span class="n">TraceSimulator</span><span class="p">(</span>
     <span class="n">P</span><span class="o">=</span><span class="n">P</span><span class="p">,</span>
     <span class="n">mu</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">]),</span>
@@ -345,6 +323,9 @@ prediction results.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">P</span><span class="p">(</span><span class="n">stay</span> <span class="n">observed</span><span class="p">)</span> <span class="o">=</span> <span class="mf">0.8</span>
 </pre></div>
 </div>
+<p>After generating the data, we want to check whether the model we
+implemented can estimate the parameters accurately, given that we know
+the correct variance at each state.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dist_params</span> <span class="o">=</span> <span class="p">(</span>
         <span class="p">{</span><span class="s2">&quot;cov&quot;</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="mf">0.015</span><span class="p">)},</span>
         <span class="p">{</span><span class="s2">&quot;cov&quot;</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="mf">0.055</span><span class="p">)},</span>
@@ -366,27 +347,51 @@ prediction results.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Converged</span> <span class="n">at</span> <span class="n">iteration</span> <span class="mi">504</span>
 </pre></div>
 </div>
+<p>The model converges after 504 iterations. The <code class="docutils literal notranslate"><span class="pre">TraceModel</span></code> class uses
+the mean absolute difference of the transition matrix between two
+iterations as the convergence criterion. The model also has a <code class="docutils literal notranslate"><span class="pre">lklhd</span></code>
+attribute that records the log likelihood of the model at each
+iteration. From the plot below, we see that the log-likelihood is
+monotonically increasing, coherent with what we would expect from an
+expectation-maximization process.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">scatterplot</span><span class="p">(</span><span class="n">tm</span><span class="o">.</span><span class="n">convergence</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+    <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Iteration number&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Mean absolute difference&quot;</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Transition matrix by iteration&quot;</span><span class="p">,</span> <span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">)</span>
+<span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">scatterplot</span><span class="p">(</span><span class="n">tm</span><span class="o">.</span><span class="n">lklhd</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+    <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Iteration number&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Log likelihood&quot;</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Log likelihood by iteration&quot;</span>
+<span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<img alt="../_images/simulations_8_0.png" src="../_images/simulations_8_0.png" />
+<p>The estimated measurement errors are listed below, which are close to
+<code class="docutils literal notranslate"><span class="pre">[0.06,</span> <span class="pre">0.06,</span> <span class="pre">0.12]</span></code> as specified in the data generation part.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tm</span><span class="o">.</span><span class="n">loc_err</span>
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([</span><span class="mf">0.05237644</span><span class="p">,</span> <span class="mf">0.05454736</span><span class="p">,</span> <span class="mf">0.11672494</span><span class="p">])</span>
 </pre></div>
 </div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
-<span class="n">sns</span><span class="o">.</span><span class="n">scatterplot</span><span class="p">(</span><span class="n">tm</span><span class="o">.</span><span class="n">convergence</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-<span class="n">sns</span><span class="o">.</span><span class="n">scatterplot</span><span class="p">(</span><span class="n">tm</span><span class="o">.</span><span class="n">lklhd</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<p>The estimated transition matrix is also close to the true transition
+matrix, and both give a similar stationary distribution, showing that
+the chain spends about 22% of time in the looped state in the long run.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sfigs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span><span class="o">.</span><span class="n">subfigures</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">tplt</span><span class="o">.</span><span class="n">plot_transition_matrix</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">sfigs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">sfigs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;True transition matrix&quot;</span><span class="p">)</span>
+<span class="n">tplt</span><span class="o">.</span><span class="n">plot_transition_matrix</span><span class="p">(</span><span class="n">tm</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">sfigs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">sfigs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;Estimated transition matrix&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">Axes</span><span class="p">:</span> <span class="o">&gt;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Text</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.98</span><span class="p">,</span> <span class="s1">&#39;Estimated transition matrix&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="../_images/simulations_7_1.png" src="../_images/simulations_7_1.png" />
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">tplt</span><span class="o">.</span><span class="n">plot_transition_matrix</span><span class="p">(</span><span class="n">tm</span><span class="o">.</span><span class="n">P</span><span class="p">)</span>
-<span class="n">fig</span> <span class="o">=</span> <span class="n">tplt</span><span class="o">.</span><span class="n">plot_transition_matrix</span><span class="p">(</span><span class="n">P</span><span class="p">)</span>
-</pre></div>
-</div>
-<img alt="../_images/simulations_8_0.png" src="../_images/simulations_8_0.png" />
-<img alt="../_images/simulations_8_1.png" src="../_images/simulations_8_1.png" />
+<img alt="../_images/simulations_12_1.png" src="../_images/simulations_12_1.png" />
+<p>Below are some traces along with their predicted/true looping profile.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;dist&quot;</span><span class="p">:</span><span class="n">dist</span><span class="p">,</span> <span class="s2">&quot;state&quot;</span><span class="p">:</span><span class="n">tm</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">X</span><span class="p">[[</span><span class="n">n</span><span class="p">]])[</span><span class="mi">0</span><span class="p">]})</span>
@@ -401,11 +406,28 @@ prediction results.</p>
 <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="../_images/simulations_9_0.png" src="../_images/simulations_9_0.png" />
-</section>
+<img alt="../_images/simulations_14_0.png" src="../_images/simulations_14_0.png" />
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;dist&quot;</span><span class="p">:</span><span class="n">dist</span><span class="p">,</span> <span class="s2">&quot;state&quot;</span><span class="p">:</span><span class="n">tm</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">X</span><span class="p">[[</span><span class="n">n</span><span class="p">]])[</span><span class="mi">0</span><span class="p">]})</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">names</span><span class="o">=</span><span class="s2">&quot;t&quot;</span><span class="p">)</span>
+<span class="n">df</span><span class="p">[</span><span class="s2">&quot;true&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">H</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+<span class="n">code_book</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span><span class="s2">&quot;looped&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="s2">&quot;intermediate&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="s2">&quot;unlooped&quot;</span><span class="p">}</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">tplt</span><span class="o">.</span><span class="n">plot_trace</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="s2">&quot;dist&quot;</span><span class="p">,</span> <span class="s2">&quot;state&quot;</span><span class="p">,</span> <span class="n">code_book</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">tplt</span><span class="o">.</span><span class="n">plot_trace</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="s2">&quot;dist&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">,</span> <span class="n">code_book</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Time (s)&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Spatial distance (µm)&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Predicted loop states&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Time (s)&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Spatial distance (µm)&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;True loop states&quot;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</pre></div>
+</div>
+<img alt="../_images/simulations_15_0.png" src="../_images/simulations_15_0.png" />
 </section>
 <section id="ignore-the-localization-error">
-<h1>Ignore the localization error<a class="headerlink" href="#ignore-the-localization-error" title="Link to this heading">¶</a></h1>
+<h2>Ignore the localization error<a class="headerlink" href="#ignore-the-localization-error" title="Link to this heading">¶</a></h2>
+<p>In this section, we demonstrate why including an additional estimate for
+measurement error is helpful. Below, we fit a HMM without measurement
+error assumption:</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dist_params</span> <span class="o">=</span> <span class="p">(</span>
         <span class="p">{</span><span class="s2">&quot;cov&quot;</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="mf">0.015</span><span class="p">)},</span>
         <span class="p">{</span><span class="s2">&quot;cov&quot;</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="mf">0.055</span><span class="p">)},</span>
@@ -426,19 +448,37 @@ prediction results.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Converged</span> <span class="n">at</span> <span class="n">iteration</span> <span class="mi">224</span>
 </pre></div>
 </div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">tplt</span><span class="o">.</span><span class="n">plot_transition_matrix</span><span class="p">(</span><span class="n">tm2</span><span class="o">.</span><span class="n">P</span><span class="p">)</span>
-</pre></div>
-</div>
-<img alt="../_images/simulations_12_0.png" src="../_images/simulations_12_0.png" />
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
 <span class="n">sns</span><span class="o">.</span><span class="n">scatterplot</span><span class="p">(</span><span class="n">tm2</span><span class="o">.</span><span class="n">convergence</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+    <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Iteration number&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Mean absolute difference&quot;</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Transition matrix by iteration&quot;</span><span class="p">,</span> <span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">)</span>
+<span class="p">)</span>
 <span class="n">sns</span><span class="o">.</span><span class="n">scatterplot</span><span class="p">(</span><span class="n">tm2</span><span class="o">.</span><span class="n">lklhd</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+    <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Iteration number&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Log likelihood&quot;</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Log likelihood by iteration&quot;</span>
+<span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">Axes</span><span class="p">:</span> <span class="o">&gt;</span>
+<img alt="../_images/simulations_18_0.png" src="../_images/simulations_18_0.png" />
+<p>The estimated transition matrix shows considerable difference from the
+true one. In addition, with this model, we would say the long run loop
+fraction is about 11% while the true fraction is twice the estimated
+one.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sfigs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span><span class="o">.</span><span class="n">subfigures</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">tplt</span><span class="o">.</span><span class="n">plot_transition_matrix</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">sfigs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">sfigs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;True transition matrix&quot;</span><span class="p">)</span>
+<span class="n">tplt</span><span class="o">.</span><span class="n">plot_transition_matrix</span><span class="p">(</span><span class="n">tm2</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">sfigs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">sfigs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;Estimated transition matrix&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="../_images/simulations_13_1.png" src="../_images/simulations_13_1.png" />
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Text</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.98</span><span class="p">,</span> <span class="s1">&#39;Estimated transition matrix&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../_images/simulations_20_1.png" src="../_images/simulations_20_1.png" />
+<p>The estimated looping profile is also problematic, as shown below:</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;dist&quot;</span><span class="p">:</span><span class="n">dist</span><span class="p">,</span> <span class="s2">&quot;state&quot;</span><span class="p">:</span><span class="n">tm2</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">X</span><span class="p">[[</span><span class="n">n</span><span class="p">]])[</span><span class="mi">0</span><span class="p">]})</span>
@@ -453,7 +493,8 @@ prediction results.</p>
 <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="../_images/simulations_14_0.png" src="../_images/simulations_14_0.png" />
+<img alt="../_images/simulations_22_0.png" src="../_images/simulations_22_0.png" />
+</section>
 </section>
 
         </article>
@@ -511,11 +552,11 @@ prediction results.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Notations</a><ul>
-<li><a class="reference internal" href="#test-by-simulations">Test by Simulations</a></li>
+<li><a class="reference internal" href="#">Demo: simulate a live cell imaging dataset</a><ul>
+<li><a class="reference internal" href="#test-tracehmm-implementation-with-simulated-data">Test traceHMM implementation with simulated data</a></li>
+<li><a class="reference internal" href="#ignore-the-localization-error">Ignore the localization error</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#ignore-the-localization-error">Ignore the localization error</a></li>
 </ul>
 
           </div>

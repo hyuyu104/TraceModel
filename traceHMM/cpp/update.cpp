@@ -1,6 +1,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 #include <vector>
+#include <iostream>
 
 using namespace std;
 namespace py = pybind11;
@@ -123,8 +124,50 @@ py::array_t<double> calculate_v(
 }
 
 
+py::array_t<double> log_viterbi(
+    const py::array_t<double> density,
+    const py::array_t<double> initdist,
+    const py::array_t<double> transmat,
+    int T, int S
+) {
+    auto den = density.unchecked<2>(); // S x T
+    auto P = transmat.unchecked<2>(); // S x S
+    auto mu = initdist.unchecked<1>(); // S
+
+    std::vector<std::vector<double>> v(T, std::vector<double>(S, 0.0));
+    std::vector<std::vector<int>> varg(T, std::vector<int>(S, 0));
+
+    py::array_t<int> states({T});
+    auto s = states.mutable_unchecked<1>();
+
+    for (int t = 0; t < T; ++t) {
+        for (int s = 0; s < S; ++s) {
+            if (t == 0) {
+                v[t][s] = log(mu(s)) + log(den(s, t));
+            } else {
+                vector<double> vs(S, -numeric_limits<double>::infinity());
+                for (int h = 0; h < S; ++h) {
+                    if (P(h, s) > 0) {
+                        vs[h] = v[t-1][h] + log(P(h, s)) + log(den(s, t));
+                    }
+                }
+                v[t][s] = *max_element(vs.begin(), vs.end());
+                varg[t-1][s] = distance(vs.begin(), max_element(vs.begin(), vs.end()));
+            }
+        }
+    }
+    varg[T-1][0] = distance(v[T-1].begin(), max_element(v[T-1].begin(), v[T-1].end()));
+    s(T-1) = varg[T-1][0];
+    for (int t = T-2; t >= 0; --t) {
+        s(t) = varg[t][s(t+1)];
+    }
+    return states;
+}
+
+
 PYBIND11_MODULE(update, m) {
     m.def("scaled_forward", &scaled_forward, "Scaled forward algorithm.");
     m.def("scaled_backward", &scaled_backward, "Scaled backward algorithm.");
     m.def("calculate_v", &calculate_v, "Calculate conditional expectation (v).");
+    m.def("log_viterbi", &log_viterbi, "Log-Viterbi decoding.");
 }

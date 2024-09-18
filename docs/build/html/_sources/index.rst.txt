@@ -15,7 +15,7 @@ Inference of chromatin loop status from live cell imaging data
 
 
 .. toctree::
-   :maxdepth: 2
-   :hidden:
+   :caption: API Reference
+   :maxdepth: 1
 
    api

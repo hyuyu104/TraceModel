@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Notations" href="simulations.html" /><link rel="prev" title="Installation" href="../markdown/install.html" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Demo: simulate a live cell imaging dataset" href="simulations.html" /><link rel="prev" title="Installation" href="../markdown/install.html" />
 
     <!-- Generated with Sphinx 8.0.2 and Furo 2024.08.06 -->
         <title>Loop state inference for Fbn2 TAD in mESCs - TraceModel 0.0 documentation</title>
@@ -205,9 +205,9 @@
 <p class="caption" role="heading"><span class="caption-text">Jupyter Notebooks</span></p>
 <ul class="current">
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Loop state inference for <em>Fbn2</em> TAD in mESCs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="simulations.html">Notations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="simulations.html#ignore-the-localization-error">Ignore the localization error</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulations.html">Demo: simulate a live cell imaging dataset</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../api.html">API Reference</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of API Reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../modules.html">traceHMM</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of traceHMM</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -265,134 +265,188 @@
 (2022)</a>. The
 data analyzed in this notebook are the C36 (wild type) and C65 (control)
 strains.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_dire</span> <span class="o">=</span> <span class="s2">&quot;../../gabriele_et_al_2023/data&quot;</span>
+</pre></div>
+</div>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
 <span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
-<span class="kn">from</span> <span class="nn">traceHMM.model</span> <span class="kn">import</span> <span class="n">TraceModel</span>
+<span class="kn">import</span> <span class="nn">traceHMM.model</span> <span class="k">as</span> <span class="nn">trm</span>
 <span class="kn">from</span> <span class="nn">traceHMM.utils</span> <span class="kn">import</span> <span class="n">plot</span> <span class="k">as</span> <span class="n">tplt</span>
+<span class="kn">from</span> <span class="nn">traceHMM.utils.func</span> <span class="kn">import</span> <span class="n">long_to_tensor</span><span class="p">,</span> <span class="n">add_predictions_to_df</span>
 </pre></div>
 </div>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">reload_ext</span> autoreload
 <span class="o">%</span><span class="k">autoreload</span> 2
 </pre></div>
 </div>
+<section id="reproduce-the-4dn-hackathon-results">
+<h2>Reproduce the 4DN hackathon results<a class="headerlink" href="#reproduce-the-4dn-hackathon-results" title="Link to this heading">¶</a></h2>
+<p>First, read in both the control and the experimental groups. The <code class="docutils literal notranslate"><span class="pre">id</span></code>
+column indicates which trace each row belongs to, and <code class="docutils literal notranslate"><span class="pre">t</span></code> records the
+time point.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dire</span><span class="p">,</span> <span class="s2">&quot;C65.tagged_set.tsv&quot;</span><span class="p">)</span>
+<span class="n">data65</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> has </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">data65</span><span class="o">.</span><span class="n">id</span><span class="p">))</span><span class="si">}</span><span class="s2"> trajectories&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">data65</span><span class="o">.</span><span class="n">head</span><span class="p">()</span><span class="o">.</span><span class="n">to_string</span><span class="p">())</span>
+
+<span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dire</span><span class="p">,</span> <span class="s2">&quot;C36.tagged_set.tsv&quot;</span><span class="p">)</span>
+<span class="n">data36</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> has </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">data36</span><span class="o">.</span><span class="n">id</span><span class="p">))</span><span class="si">}</span><span class="s2"> trajectories&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">data36</span><span class="o">.</span><span class="n">head</span><span class="p">()</span><span class="o">.</span><span class="n">to_string</span><span class="p">())</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">C65</span><span class="o">.</span><span class="n">tagged_set</span><span class="o">.</span><span class="n">tsv</span> <span class="n">has</span> <span class="mi">147</span> <span class="n">trajectories</span>
+   <span class="nb">id</span>  <span class="n">t</span>          <span class="n">x</span>          <span class="n">y</span>         <span class="n">z</span>         <span class="n">x2</span>         <span class="n">y2</span>        <span class="n">z2</span>      <span class="n">dist</span>           <span class="n">movie_index</span>
+<span class="mi">0</span>   <span class="mi">0</span>  <span class="mi">1</span>  <span class="mf">33.384880</span>  <span class="mf">28.749708</span>  <span class="mf">1.267213</span>  <span class="mf">32.952367</span>  <span class="mf">29.029923</span>  <span class="mf">1.462896</span>  <span class="mf">0.551252</span>  <span class="mi">2020_09_03</span><span class="n">_movie1</span><span class="o">-</span><span class="mi">03</span>
+<span class="mi">1</span>   <span class="mi">0</span>  <span class="mi">2</span>  <span class="mf">33.377873</span>  <span class="mf">28.654452</span>  <span class="mf">1.225418</span>  <span class="mf">32.798974</span>  <span class="mf">28.968542</span>  <span class="mf">1.258580</span>  <span class="mf">0.659452</span>  <span class="mi">2020_09_03</span><span class="n">_movie1</span><span class="o">-</span><span class="mi">03</span>
+<span class="mi">2</span>   <span class="mi">0</span>  <span class="mi">3</span>  <span class="mf">33.347297</span>  <span class="mf">28.501661</span>  <span class="mf">1.093382</span>  <span class="mf">32.748908</span>  <span class="mf">28.775660</span>  <span class="mf">1.172601</span>  <span class="mf">0.662888</span>  <span class="mi">2020_09_03</span><span class="n">_movie1</span><span class="o">-</span><span class="mi">03</span>
+<span class="mi">3</span>   <span class="mi">0</span>  <span class="mi">4</span>  <span class="mf">33.410479</span>  <span class="mf">28.231071</span>  <span class="mf">1.050455</span>  <span class="mf">32.805305</span>  <span class="mf">28.571315</span>  <span class="mf">1.108860</span>  <span class="mf">0.696716</span>  <span class="mi">2020_09_03</span><span class="n">_movie1</span><span class="o">-</span><span class="mi">03</span>
+<span class="mi">4</span>   <span class="mi">0</span>  <span class="mi">7</span>  <span class="mf">33.661071</span>  <span class="mf">28.774886</span>  <span class="mf">1.453220</span>  <span class="mf">33.162907</span>  <span class="mf">28.963981</span>  <span class="mf">1.377385</span>  <span class="mf">0.538214</span>  <span class="mi">2020_09_03</span><span class="n">_movie1</span><span class="o">-</span><span class="mi">03</span>
+<span class="n">C36</span><span class="o">.</span><span class="n">tagged_set</span><span class="o">.</span><span class="n">tsv</span> <span class="n">has</span> <span class="mi">491</span> <span class="n">trajectories</span>
+   <span class="nb">id</span>   <span class="n">t</span>          <span class="n">x</span>          <span class="n">y</span>         <span class="n">z</span>         <span class="n">x2</span>         <span class="n">y2</span>        <span class="n">z2</span>      <span class="n">dist</span>           <span class="n">movie_index</span>
+<span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">6</span>  <span class="mf">21.402718</span>  <span class="mf">28.628556</span>  <span class="mf">5.736118</span>  <span class="mf">21.410426</span>  <span class="mf">28.615074</span>  <span class="mf">5.612181</span>  <span class="mf">0.124906</span>  <span class="mi">2020_08_31</span><span class="n">_movie1</span><span class="o">-</span><span class="mi">03</span>
+<span class="mi">1</span>   <span class="mi">0</span>   <span class="mi">7</span>  <span class="mf">21.842653</span>  <span class="mf">28.646646</span>  <span class="mf">5.347591</span>  <span class="mf">21.865756</span>  <span class="mf">28.661069</span>  <span class="mf">5.405542</span>  <span class="mf">0.064032</span>  <span class="mi">2020_08_31</span><span class="n">_movie1</span><span class="o">-</span><span class="mi">03</span>
+<span class="mi">2</span>   <span class="mi">0</span>   <span class="mi">9</span>  <span class="mf">21.699202</span>  <span class="mf">28.473489</span>  <span class="mf">5.245348</span>  <span class="mf">21.678237</span>  <span class="mf">28.464744</span>  <span class="mf">5.218815</span>  <span class="mf">0.034929</span>  <span class="mi">2020_08_31</span><span class="n">_movie1</span><span class="o">-</span><span class="mi">03</span>
+<span class="mi">3</span>   <span class="mi">0</span>  <span class="mi">10</span>  <span class="mf">21.706599</span>  <span class="mf">28.822224</span>  <span class="mf">5.717446</span>  <span class="mf">21.709891</span>  <span class="mf">28.841900</span>  <span class="mf">5.522071</span>  <span class="mf">0.196391</span>  <span class="mi">2020_08_31</span><span class="n">_movie1</span><span class="o">-</span><span class="mi">03</span>
+<span class="mi">4</span>   <span class="mi">0</span>  <span class="mi">11</span>  <span class="mf">22.203565</span>  <span class="mf">28.649616</span>  <span class="mf">5.512207</span>  <span class="mf">22.193264</span>  <span class="mf">28.564196</span>  <span class="mf">5.497887</span>  <span class="mf">0.087223</span>  <span class="mi">2020_08_31</span><span class="n">_movie1</span><span class="o">-</span><span class="mi">03</span>
+</pre></div>
+</div>
+<p>Calculate the variance of each state using the variance from the C65
+group.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">]</span>
+<span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cols</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">df</span> <span class="ow">in</span> <span class="p">[</span><span class="n">data36</span><span class="p">,</span> <span class="n">data65</span><span class="p">]:</span>
+        <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;d</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">-</span> <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">2&quot;</span><span class="p">]</span>
+<span class="n">null_cov</span> <span class="o">=</span> <span class="n">data65</span><span class="p">[[</span><span class="s2">&quot;dx&quot;</span><span class="p">,</span> <span class="s2">&quot;dy&quot;</span><span class="p">,</span> <span class="s2">&quot;dz&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">null_cov</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">null_cov</span><span class="p">)</span>
+<span class="n">r</span> <span class="o">=</span> <span class="mf">0.15</span> <span class="c1"># loop state variance is 15% of unloop state</span>
+<span class="n">covs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">null_cov</span><span class="o">*</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)])</span>
+<span class="n">covs</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([[[</span><span class="mf">0.01453355</span><span class="p">,</span> <span class="mf">0.</span>        <span class="p">,</span> <span class="mf">0.</span>        <span class="p">],</span>
+        <span class="p">[</span><span class="mf">0.</span>        <span class="p">,</span> <span class="mf">0.01322972</span><span class="p">,</span> <span class="mf">0.</span>        <span class="p">],</span>
+        <span class="p">[</span><span class="mf">0.</span>        <span class="p">,</span> <span class="mf">0.</span>        <span class="p">,</span> <span class="mf">0.01580395</span><span class="p">]],</span>
+
+       <span class="p">[[</span><span class="mf">0.05571193</span><span class="p">,</span> <span class="mf">0.</span>        <span class="p">,</span> <span class="mf">0.</span>        <span class="p">],</span>
+        <span class="p">[</span><span class="mf">0.</span>        <span class="p">,</span> <span class="mf">0.05071393</span><span class="p">,</span> <span class="mf">0.</span>        <span class="p">],</span>
+        <span class="p">[</span><span class="mf">0.</span>        <span class="p">,</span> <span class="mf">0.</span>        <span class="p">,</span> <span class="mf">0.06058182</span><span class="p">]],</span>
+
+       <span class="p">[[</span><span class="mf">0.09689032</span><span class="p">,</span> <span class="mf">0.</span>        <span class="p">,</span> <span class="mf">0.</span>        <span class="p">],</span>
+        <span class="p">[</span><span class="mf">0.</span>        <span class="p">,</span> <span class="mf">0.08819814</span><span class="p">,</span> <span class="mf">0.</span>        <span class="p">],</span>
+        <span class="p">[</span><span class="mf">0.</span>        <span class="p">,</span> <span class="mf">0.</span>        <span class="p">,</span> <span class="mf">0.10535968</span><span class="p">]]])</span>
+</pre></div>
+</div>
+<p>Reshape the dataframe to a three dimensional numpy array.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">X36</span> <span class="o">=</span> <span class="n">long_to_tensor</span><span class="p">(</span><span class="n">data36</span><span class="p">,</span> <span class="n">t_col</span><span class="o">=</span><span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="n">id_col</span><span class="o">=</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="n">val_cols</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;dx&quot;</span><span class="p">,</span> <span class="s2">&quot;dy&quot;</span><span class="p">,</span> <span class="s2">&quot;dz&quot;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Array shape for C36 (N, T, S):&quot;</span><span class="p">,</span> <span class="n">X36</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="n">X65</span> <span class="o">=</span> <span class="n">long_to_tensor</span><span class="p">(</span><span class="n">data65</span><span class="p">,</span> <span class="n">t_col</span><span class="o">=</span><span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="n">id_col</span><span class="o">=</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="n">val_cols</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;dx&quot;</span><span class="p">,</span> <span class="s2">&quot;dy&quot;</span><span class="p">,</span> <span class="s2">&quot;dz&quot;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Array shape for C65 (N, T, S):&quot;</span><span class="p">,</span> <span class="n">X65</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Array</span> <span class="n">shape</span> <span class="k">for</span> <span class="n">C36</span> <span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">S</span><span class="p">):</span> <span class="p">(</span><span class="mi">491</span><span class="p">,</span> <span class="mi">365</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">Array</span> <span class="n">shape</span> <span class="k">for</span> <span class="n">C65</span> <span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">S</span><span class="p">):</span> <span class="p">(</span><span class="mi">147</span><span class="p">,</span> <span class="mi">365</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here, the chain is not allowed to jump directly from unlooped to looped
+or looped to unlooped. This is achived by setting the corner elements of
+the transition matrix to 0 while leaving other entries to be negative
+(negative value -&gt; will be updated in fitting, see more in API
+Reference).</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dist_params</span> <span class="o">=</span> <span class="p">({</span><span class="s2">&quot;cov&quot;</span><span class="p">:</span><span class="n">covs</span><span class="p">[</span><span class="mi">0</span><span class="p">]},</span> <span class="p">{</span><span class="s2">&quot;cov&quot;</span><span class="p">:</span><span class="n">covs</span><span class="p">[</span><span class="mi">1</span><span class="p">]},</span> <span class="p">{</span><span class="s2">&quot;cov&quot;</span><span class="p">:</span><span class="n">covs</span><span class="p">[</span><span class="mi">2</span><span class="p">]})</span>
+<span class="n">tm36</span> <span class="o">=</span> <span class="n">trm</span><span class="o">.</span><span class="n">TraceModel</span><span class="p">(</span>
+    <span class="n">X</span><span class="o">=</span><span class="n">X36</span><span class="p">,</span> <span class="n">Pm</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+        <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>  <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="p">]),</span>
+    <span class="n">dist_params</span><span class="o">=</span><span class="n">dist_params</span><span class="p">,</span>
+    <span class="n">dist_type</span><span class="o">=</span><span class="n">trm</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">tm36</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">max_iter</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Converged</span> <span class="n">at</span> <span class="n">iteration</span> <span class="mi">90</span>
+</pre></div>
+</div>
+<p>There is a <code class="docutils literal notranslate"><span class="pre">convergence</span></code> attribute for <code class="docutils literal notranslate"><span class="pre">TraceModel</span></code>, which records
+the mean absolute difference of the transition matrix between two
+consecutive iterations. We can plot this difference to see the
+convergence of the model. In addition, we plot the log-likelihood at
+each iteration to check the model fit.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">scatterplot</span><span class="p">(</span><span class="n">tm36</span><span class="o">.</span><span class="n">convergence</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+    <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Iteration number&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Mean absolute difference&quot;</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Transition matrix by iteration&quot;</span><span class="p">,</span> <span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">)</span>
+<span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">scatterplot</span><span class="p">(</span><span class="n">tm36</span><span class="o">.</span><span class="n">lklhd</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+    <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Iteration number&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Log likelihood&quot;</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Log likelihood by iteration&quot;</span>
+<span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<img alt="../_images/gabriele_et_al_13_0.png" src="../_images/gabriele_et_al_13_0.png" />
+<p>The fitted transition matrix and its corresponding stationary
+distribution is shown below:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">tplt</span><span class="o">.</span><span class="n">plot_transition_matrix</span><span class="p">(</span><span class="n">tm36</span><span class="o">.</span><span class="n">P</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../_images/gabriele_et_al_15_0.png" src="../_images/gabriele_et_al_15_0.png" />
+<p>Decode the observed traces with the fitted model shows that the chain
+spends about 7% time in the looped state.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">tm36</span><span class="o">.</span><span class="n">decode</span><span class="p">(),</span> <span class="n">return_counts</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;C36 Loop fraction: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">counts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="nb">sum</span><span class="p">(</span><span class="n">counts</span><span class="p">),</span><span class="w"> </span><span class="mi">4</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
+<span class="n">counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">tm36</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">X65</span><span class="p">),</span> <span class="n">return_counts</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;C65 Loop fraction: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">counts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="nb">sum</span><span class="p">(</span><span class="n">counts</span><span class="p">),</span><span class="w"> </span><span class="mi">4</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">C36</span> <span class="n">Loop</span> <span class="n">fraction</span><span class="p">:</span> <span class="mf">7.39</span><span class="o">%</span>
+<span class="n">C65</span> <span class="n">Loop</span> <span class="n">fraction</span><span class="p">:</span> <span class="mf">4.05</span><span class="o">%</span>
+</pre></div>
+</div>
+<p>Below we show some sample traces from C36 and C65, along with their
+decoded states:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">add_predictions_to_df</span><span class="p">(</span><span class="n">data36</span><span class="p">,</span> <span class="n">tm36</span><span class="o">.</span><span class="n">decode</span><span class="p">(),</span> <span class="n">X</span><span class="o">=</span><span class="n">X36</span><span class="p">)</span>
+<span class="n">add_predictions_to_df</span><span class="p">(</span><span class="n">data65</span><span class="p">,</span> <span class="n">tm36</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">X65</span><span class="p">),</span> <span class="n">X</span><span class="o">=</span><span class="n">X65</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">code_book</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span><span class="s2">&quot;looped&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="s2">&quot;intermediate&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="s2">&quot;unlooped&quot;</span><span class="p">}</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">data36</span><span class="p">[</span><span class="n">data36</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span><span class="o">==</span><span class="mi">22</span><span class="p">]</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">tplt</span><span class="o">.</span><span class="n">plot_trace</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="s2">&quot;dist&quot;</span><span class="p">,</span> <span class="s2">&quot;state&quot;</span><span class="p">,</span> <span class="n">code_book</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">),</span> <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Time (s)&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Spatial distance (µm)&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;C36 Trace 22&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<img alt="../_images/gabriele_et_al_20_0.png" src="../_images/gabriele_et_al_20_0.png" />
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">code_book</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span><span class="s2">&quot;looped&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="s2">&quot;intermediate&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="s2">&quot;unlooped&quot;</span><span class="p">}</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">data65</span><span class="p">[</span><span class="n">data65</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span><span class="o">==</span><span class="mi">14</span><span class="p">]</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">tplt</span><span class="o">.</span><span class="n">plot_trace</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="s2">&quot;dist&quot;</span><span class="p">,</span> <span class="s2">&quot;state&quot;</span><span class="p">,</span> <span class="n">code_book</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">),</span> <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Time (s)&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Spatial distance (µm)&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;C65 Trace 14&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<img alt="../_images/gabriele_et_al_21_0.png" src="../_images/gabriele_et_al_21_0.png" />
+</section>
+<hr class="docutils" />
 <section id="analysis-of-c65-the-control-group">
 <h2>Analysis of C65 - the control group<a class="headerlink" href="#analysis-of-c65-the-control-group" title="Link to this heading">¶</a></h2>
 <section id="read-in-data">
 <h3>Read in data<a class="headerlink" href="#read-in-data" title="Link to this heading">¶</a></h3>
 <p>Please replace the <code class="docutils literal notranslate"><span class="pre">data_dire</span></code> with the relative path of the data
 stored on your machine.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_dire</span> <span class="o">=</span> <span class="s2">&quot;../../../../gabriele_et_al_2023/data&quot;</span>
-<span class="n">control_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dire</span><span class="p">,</span> <span class="s2">&quot;C65.tagged_set.tsv&quot;</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">control_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dire</span><span class="p">,</span> <span class="s2">&quot;C36.tagged_set.tsv&quot;</span><span class="p">)</span>
 <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">control_path</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">control_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> has </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">id</span><span class="p">))</span><span class="si">}</span><span class="s2"> trajectories&quot;</span><span class="p">)</span>
 <span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">C65</span><span class="o">.</span><span class="n">tagged_set</span><span class="o">.</span><span class="n">tsv</span> <span class="n">has</span> <span class="mi">147</span> <span class="n">trajectories</span>
-</pre></div>
-</div>
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>id</th>
-      <th>t</th>
-      <th>x</th>
-      <th>y</th>
-      <th>z</th>
-      <th>x2</th>
-      <th>y2</th>
-      <th>z2</th>
-      <th>dist</th>
-      <th>movie_index</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>0</td>
-      <td>1</td>
-      <td>33.384880</td>
-      <td>28.749708</td>
-      <td>1.267213</td>
-      <td>32.952367</td>
-      <td>29.029923</td>
-      <td>1.462896</td>
-      <td>0.551252</td>
-      <td>2020_09_03_movie1-03</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>0</td>
-      <td>2</td>
-      <td>33.377873</td>
-      <td>28.654452</td>
-      <td>1.225418</td>
-      <td>32.798974</td>
-      <td>28.968542</td>
-      <td>1.258580</td>
-      <td>0.659452</td>
-      <td>2020_09_03_movie1-03</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>0</td>
-      <td>3</td>
-      <td>33.347297</td>
-      <td>28.501661</td>
-      <td>1.093382</td>
-      <td>32.748908</td>
-      <td>28.775660</td>
-      <td>1.172601</td>
-      <td>0.662888</td>
-      <td>2020_09_03_movie1-03</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>0</td>
-      <td>4</td>
-      <td>33.410479</td>
-      <td>28.231071</td>
-      <td>1.050455</td>
-      <td>32.805305</td>
-      <td>28.571315</td>
-      <td>1.108860</td>
-      <td>0.696716</td>
-      <td>2020_09_03_movie1-03</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>0</td>
-      <td>7</td>
-      <td>33.661071</td>
-      <td>28.774886</td>
-      <td>1.453220</td>
-      <td>33.162907</td>
-      <td>28.963981</td>
-      <td>1.377385</td>
-      <td>0.538214</td>
-      <td>2020_09_03_movie1-03</td>
-    </tr>
-  </tbody>
-</table>
-</div><p>Reformat the data from long to wide via pivot then fit the model. Here
+<p>Reformat the data from long to wide via pivot then fit the model. Here
 we assume there are three states: looped state, intermediate state, and
 unlooped state, denoted by 0, 1, and 2, respectively.</p>
 <p>For the model, we assume the distance at each state follows a normal
@@ -402,43 +456,68 @@ distribution with means and standard deviations (in µm) listed in
 either from looped to unlooped or from unlooped to looped, initializing
 the corners of the matrix to 0 will ensure they are not updated during
 fitting.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">many_available_ids</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;t&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">150</span><span class="p">:]</span>
-<span class="n">sub_data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">many_available_ids</span><span class="o">.</span><span class="n">values</span><span class="p">)]</span>
-
-<span class="n">pivoted</span> <span class="o">=</span> <span class="n">sub_data</span><span class="o">.</span><span class="n">pivot</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="s2">&quot;dist&quot;</span><span class="p">)</span>
-<span class="n">X</span> <span class="o">=</span> <span class="n">pivoted</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">T</span>
-<span class="n">dist_params</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="p">{</span><span class="s2">&quot;loc&quot;</span><span class="p">:</span><span class="mf">0.15</span><span class="p">,</span> <span class="s2">&quot;scale&quot;</span><span class="p">:</span><span class="mf">0.1</span><span class="p">},</span>
-    <span class="p">{</span><span class="s2">&quot;loc&quot;</span><span class="p">:</span><span class="mf">0.3</span><span class="p">,</span> <span class="s2">&quot;scale&quot;</span><span class="p">:</span><span class="mf">0.2</span><span class="p">},</span>
-    <span class="p">{</span><span class="s2">&quot;loc&quot;</span><span class="p">:</span><span class="mf">0.45</span><span class="p">,</span> <span class="s2">&quot;scale&quot;</span><span class="p">:</span><span class="mf">0.1</span><span class="p">}</span>
-<span class="p">)</span>
-<span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
-    <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>  <span class="mi">0</span><span class="p">],</span>
-    <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span>
-    <span class="p">[</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-<span class="p">])</span>
-<span class="n">tm3</span> <span class="o">=</span> <span class="n">TraceModel</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">Pm</span><span class="o">=</span><span class="n">P</span><span class="p">,</span> <span class="n">dist_params</span><span class="o">=</span><span class="n">dist_params</span><span class="p">)</span>
-<span class="n">tm3</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">max_iter</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+<p>For the variance, we have the following relation:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\mathbb E[D^2] = \mathbb E[dx^2] + \mathbb E[dy^2] + \mathbb E[dz^2]\]</div>
+</div>
+<p>Therefore, squaring the expected distance and dividing it by three will
+give a reasonable initial guess.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="mf">0.2</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="mi">3</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Converged</span> <span class="n">at</span> <span class="n">iteration</span> <span class="mi">85</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">]:</span>
+    <span class="n">data</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;d</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">2&quot;</span><span class="p">]</span>
+<span class="n">val_cols</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;dx&quot;</span><span class="p">,</span> <span class="s2">&quot;dy&quot;</span><span class="p">,</span> <span class="s2">&quot;dz&quot;</span><span class="p">]</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">long_to_tensor</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">t_col</span><span class="o">=</span><span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="n">id_col</span><span class="o">=</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="n">val_cols</span><span class="o">=</span><span class="n">val_cols</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dist_params</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">{</span><span class="s2">&quot;cov&quot;</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="mf">0.015</span><span class="p">)},</span>
+        <span class="p">{</span><span class="s2">&quot;cov&quot;</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="mf">0.05</span><span class="p">)},</span>
+        <span class="p">{</span><span class="s2">&quot;cov&quot;</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="mf">0.0727</span><span class="p">)}</span>
+<span class="p">)</span>
+<span class="c1"># add localization errors to the distributions</span>
+<span class="n">errs</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.06</span><span class="p">,</span> <span class="mf">0.06</span><span class="p">,</span> <span class="mf">0.12</span><span class="p">]</span>
+<span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">dist_params</span><span class="p">,</span> <span class="n">errs</span><span class="p">):</span>
+    <span class="n">c</span><span class="p">[</span><span class="s2">&quot;err&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="o">*</span><span class="n">e</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">tm3</span> <span class="o">=</span> <span class="n">trm</span><span class="o">.</span><span class="n">TraceModel</span><span class="p">(</span>
+    <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">Pm</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+        <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>  <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="p">]),</span>
+    <span class="n">dist_params</span><span class="o">=</span><span class="n">dist_params</span><span class="p">,</span>
+    <span class="n">dist_type</span><span class="o">=</span><span class="n">trm</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">,</span>
+    <span class="c1"># update_dist_params=[&quot;err&quot;]</span>
+<span class="p">)</span>
+<span class="n">tm3</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">max_iter</span><span class="o">=</span><span class="mi">600</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dist_params</span>
 </pre></div>
 </div>
 <p>There is a <code class="docutils literal notranslate"><span class="pre">convergence</span></code> attribute for <code class="docutils literal notranslate"><span class="pre">TraceModel</span></code>, which records
 the mean absolute difference of the transition matrix between two
 consecutive iterations. We can plot this difference to see the
 convergence of the model.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
-<span class="n">sns</span><span class="o">.</span><span class="n">scatterplot</span><span class="p">(</span><span class="n">tm3</span><span class="o">.</span><span class="n">convergence</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
-    <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;# of iteration&quot;</span><span class="p">,</span>
-    <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Mean absolute difference&quot;</span><span class="p">,</span>
-    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Difference between each iteration&quot;</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">scatterplot</span><span class="p">(</span><span class="n">tm3</span><span class="o">.</span><span class="n">convergence</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+    <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Iteration number&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Mean absolute difference&quot;</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Transition matrix by iteration&quot;</span><span class="p">,</span> <span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">)</span>
+<span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">scatterplot</span><span class="p">(</span><span class="n">tm3</span><span class="o">.</span><span class="n">lklhd</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+    <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Iteration number&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Log likelihood&quot;</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Log likelihood by iteration&quot;</span>
 <span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="../_images/gabriele_et_al_8_0.png" src="../_images/gabriele_et_al_8_0.png" />
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tm3</span><span class="o">.</span><span class="n">loc_err</span>
+</pre></div>
+</div>
 </section>
 <section id="plot-the-fitted-transition-matrix">
 <h3>Plot the fitted transition matrix<a class="headerlink" href="#plot-the-fitted-transition-matrix" title="Link to this heading">¶</a></h3>
@@ -449,7 +528,11 @@ coincides with the experiment design as C65 is the control group.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">tplt</span><span class="o">.</span><span class="n">plot_transition_matrix</span><span class="p">(</span><span class="n">tm3</span><span class="o">.</span><span class="n">P</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="../_images/gabriele_et_al_10_0.png" src="../_images/gabriele_et_al_10_0.png" />
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
+<span class="n">pred</span> <span class="o">=</span> <span class="n">tm3</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+<span class="n">Counter</span><span class="p">(</span><span class="n">pred</span><span class="p">[</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">X</span><span class="p">[:,:,</span><span class="mi">0</span><span class="p">])])</span>
+</pre></div>
+</div>
 </section>
 <section id="plot-some-sample-trajectories">
 <h3>Plot some sample trajectories<a class="headerlink" href="#plot-some-sample-trajectories" title="Link to this heading">¶</a></h3>
@@ -457,24 +540,27 @@ coincides with the experiment design as C65 is the control group.</p>
 <span class="n">pd</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">id</span><span class="p">)[:</span><span class="mi">10</span><span class="p">]</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">])</span>
-</pre></div>
-</div>
 <p>Note the decode method only accepts two-dimensional numpy array, with
 each row being one trace.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">code_book</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span><span class="s2">&quot;looped&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="s2">&quot;intermediate&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="s2">&quot;unlooped&quot;</span><span class="p">}</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">id</span><span class="o">==</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-<span class="n">df</span><span class="p">[</span><span class="s2">&quot;state&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tm3</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;dist&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="kc">None</span><span class="p">,:])[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">id</span><span class="o">==</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">t_range</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">366</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;int&quot;</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;t&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">t_range</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+<span class="n">df</span><span class="p">[</span><span class="s2">&quot;state&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tm3</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">val_cols</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="kc">None</span><span class="p">,:])[</span><span class="mi">0</span><span class="p">]</span>
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">tplt</span><span class="o">.</span><span class="n">plot_trace</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="s2">&quot;dist&quot;</span><span class="p">,</span> <span class="s2">&quot;state&quot;</span><span class="p">,</span> <span class="n">code_book</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="../_images/gabriele_et_al_14_0.png" src="../_images/gabriele_et_al_14_0.png" />
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">id</span><span class="o">==</span><span class="mi">6</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-<span class="n">df</span><span class="p">[</span><span class="s2">&quot;state&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tm3</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;dist&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="kc">None</span><span class="p">,:])[</span><span class="mi">0</span><span class="p">]</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">id</span><span class="o">==</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">t_range</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">366</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;int&quot;</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;t&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">t_range</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+<span class="n">df</span><span class="p">[</span><span class="s2">&quot;state&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tm3</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">val_cols</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="kc">None</span><span class="p">,:])[</span><span class="mi">0</span><span class="p">]</span>
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">tplt</span><span class="o">.</span><span class="n">plot_trace</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="s2">&quot;dist&quot;</span><span class="p">,</span> <span class="s2">&quot;state&quot;</span><span class="p">,</span> <span class="n">code_book</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="../_images/gabriele_et_al_15_0.png" src="../_images/gabriele_et_al_15_0.png" />
 </section>
 </section>
 <section id="analysis-of-c36-the-experiment-group">
@@ -487,108 +573,7 @@ difference.</p>
 <span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">C36</span><span class="o">.</span><span class="n">tagged_set</span><span class="o">.</span><span class="n">tsv</span> <span class="n">has</span> <span class="mi">491</span> <span class="n">trajectories</span>
-</pre></div>
-</div>
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>id</th>
-      <th>t</th>
-      <th>x</th>
-      <th>y</th>
-      <th>z</th>
-      <th>x2</th>
-      <th>y2</th>
-      <th>z2</th>
-      <th>dist</th>
-      <th>movie_index</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>0</td>
-      <td>6</td>
-      <td>21.402718</td>
-      <td>28.628556</td>
-      <td>5.736118</td>
-      <td>21.410426</td>
-      <td>28.615074</td>
-      <td>5.612181</td>
-      <td>0.124906</td>
-      <td>2020_08_31_movie1-03</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>0</td>
-      <td>7</td>
-      <td>21.842653</td>
-      <td>28.646646</td>
-      <td>5.347591</td>
-      <td>21.865756</td>
-      <td>28.661069</td>
-      <td>5.405542</td>
-      <td>0.064032</td>
-      <td>2020_08_31_movie1-03</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>0</td>
-      <td>9</td>
-      <td>21.699202</td>
-      <td>28.473489</td>
-      <td>5.245348</td>
-      <td>21.678237</td>
-      <td>28.464744</td>
-      <td>5.218815</td>
-      <td>0.034929</td>
-      <td>2020_08_31_movie1-03</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>0</td>
-      <td>10</td>
-      <td>21.706599</td>
-      <td>28.822224</td>
-      <td>5.717446</td>
-      <td>21.709891</td>
-      <td>28.841900</td>
-      <td>5.522071</td>
-      <td>0.196391</td>
-      <td>2020_08_31_movie1-03</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>0</td>
-      <td>11</td>
-      <td>22.203565</td>
-      <td>28.649616</td>
-      <td>5.512207</td>
-      <td>22.193264</td>
-      <td>28.564196</td>
-      <td>5.497887</td>
-      <td>0.087223</td>
-      <td>2020_08_31_movie1-03</td>
-    </tr>
-  </tbody>
-</table>
-</div><div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">many_available_ids</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;t&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">150</span><span class="p">:]</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">many_available_ids</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;t&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">150</span><span class="p">:]</span>
 <span class="n">sub_data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">many_available_ids</span><span class="o">.</span><span class="n">values</span><span class="p">)]</span>
 
 <span class="n">pivoted</span> <span class="o">=</span> <span class="n">sub_data</span><span class="o">.</span><span class="n">pivot</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="s2">&quot;dist&quot;</span><span class="p">)</span>
@@ -607,9 +592,6 @@ difference.</p>
 <span class="n">tme</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">max_iter</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Converged</span> <span class="n">at</span> <span class="n">iteration</span> <span class="mi">77</span>
-</pre></div>
-</div>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
 <span class="n">sns</span><span class="o">.</span><span class="n">scatterplot</span><span class="p">(</span><span class="n">tme</span><span class="o">.</span><span class="n">convergence</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
 <span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
@@ -620,15 +602,10 @@ difference.</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="../_images/gabriele_et_al_19_0.png" src="../_images/gabriele_et_al_19_0.png" />
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">tplt</span><span class="o">.</span><span class="n">plot_transition_matrix</span><span class="p">(</span><span class="n">tme</span><span class="o">.</span><span class="n">P</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="../_images/gabriele_et_al_20_0.png" src="../_images/gabriele_et_al_20_0.png" />
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pd</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">sub_data</span><span class="o">.</span><span class="n">id</span><span class="p">)[</span><span class="mi">10</span><span class="p">:</span><span class="mi">20</span><span class="p">]</span>
-</pre></div>
-</div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([</span><span class="mi">22</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">37</span><span class="p">,</span> <span class="mi">39</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">44</span><span class="p">,</span> <span class="mi">48</span><span class="p">,</span> <span class="mi">52</span><span class="p">,</span> <span class="mi">56</span><span class="p">,</span> <span class="mi">59</span><span class="p">])</span>
 </pre></div>
 </div>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">sub_data</span><span class="p">[</span><span class="n">sub_data</span><span class="o">.</span><span class="n">id</span><span class="o">==</span><span class="mi">34</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -636,7 +613,6 @@ difference.</p>
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">tplt</span><span class="o">.</span><span class="n">plot_trace</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="s2">&quot;dist&quot;</span><span class="p">,</span> <span class="s2">&quot;state&quot;</span><span class="p">,</span> <span class="n">code_book</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="../_images/gabriele_et_al_22_0.png" src="../_images/gabriele_et_al_22_0.png" />
 </section>
 </section>
 
@@ -650,7 +626,7 @@ difference.</p>
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Notations</div>
+                <div class="title">Demo: simulate a live cell imaging dataset</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -696,6 +672,7 @@ difference.</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Loop state inference for <em>Fbn2</em> TAD in mESCs</a><ul>
+<li><a class="reference internal" href="#reproduce-the-4dn-hackathon-results">Reproduce the 4DN hackathon results</a></li>
 <li><a class="reference internal" href="#analysis-of-c65-the-control-group">Analysis of C65 - the control group</a><ul>
 <li><a class="reference internal" href="#read-in-data">Read in data</a></li>
 <li><a class="reference internal" href="#plot-the-fitted-transition-matrix">Plot the fitted transition matrix</a></li>
@@ -718,5 +695,6 @@ difference.</p>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=5fa4622c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </body>
 </html>

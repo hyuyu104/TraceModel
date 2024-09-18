@@ -1,7 +1,7 @@
-compileCpp:
+compile-cpp:
 	cd traceHMM/cpp; cmake .; make 
 
-clearCpp:
+clear-cpp:
 	rm -r traceHMM/cpp/CMakeFiles
 	rm traceHMM/cpp/cmake_install.cmake
 	rm traceHMM/cpp/CMakeCache.txt
@@ -15,7 +15,7 @@ clearCpp:
 # 	mkdir traceHMM/cpp
 # 	mv traceHMM/update.cpython-312-darwin.so traceHMM/cpp/
 
-gitAdd:
+git-add:
 	git add -A traceHMM
 	git add -A docs
 	git add Makefile
@@ -31,7 +31,7 @@ gitAdd:
 devel:
 	python -m pip install -e .
 
-initSphinx:
+init-sphinx:
 	sphinx-quickstart docs
 	sphinx-build -M html docs/source/ docs/build/
 

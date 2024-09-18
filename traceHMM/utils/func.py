@@ -74,3 +74,95 @@ def stationary_dist(P:np.ndarray) -> np.ndarray:
         v = v[:, 0]
     v = (v/np.sum(v)).flatten()
     return v
+
+
+def long_to_tensor(
+    df:pd.DataFrame,
+    id_col:str,
+    t_col:str,
+    val_cols:str|list
+) -> np.ndarray:
+    """Generate the input tensor for the TraceModel class.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Input dataframe in the long format: each row is a time point for one
+        trace. Has time, trace ID, and values (spatial distance/difference in
+        each axis/raw coordinates) as columns.
+    id_col : str
+        Trace ID column name.
+    t_col : str
+        Time column name.
+    val_cols : str | list
+        Either a list of value column names or a single value column name.
+
+    Returns
+    -------
+    (N, T, D) np.ndarray
+        N is the total number of traces (number of unique trace IDs), T is 
+        the total number of time points, and D is the length of `val_cols`.
+    """
+    if isinstance(val_cols, str):
+        val_cols = [val_cols]
+    pivoted = df.pivot(index=t_col, columns=id_col, values=val_cols)
+    arr = np.stack([pivoted[t] for t in val_cols])
+    return arr.transpose((2, 1, 0))
+
+
+def add_predictions_to_df(
+    df:pd.DataFrame,
+    decoded_states:np.ndarray,
+    X:np.ndarray=None,
+    id_col:str=None,
+    t_col:str=None,
+    val_cols:str|list=None,
+    num_name:str="state",
+    code_book:dict=None,
+    loop_name:str="loop"
+):
+    """Add decoding results to the dataframe. Must provide `id_col`, `t_col`, 
+    and `val_cols` if `X`, the tensor format of `df`, is not supplied.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Dataframe to add the decoding results.
+    decoded_states : np.ndarray
+        Decoding results from TraceModel.decode.
+    X : np.ndarray, optional
+        Obtained by running long_to_tensor on `df`, by default None.
+    id_col : str
+        Trace ID column name.
+    t_col : str
+        Time column name.
+    val_cols : str | list
+        Either a list of value column names or a single value column name.
+    num_name : str, optional
+        Decoding state column name, by default "state".
+    code_book : dict, optional
+        A dictionary with keys as integers (states) and values as strings (
+        name of each state), by default None.
+    loop_name : str, optional
+        If `code_book` is not None, use this as the column name for the names
+        of each state, by default "loop".
+
+    Raises
+    ------
+    ValueError
+        If `decoded_states` cannot be reshaped to match the shape of `df`.
+    """
+    if X is None:
+        X = long_to_tensor(df, id_col, t_col, val_cols)
+        
+    avail = ~np.isnan(X[...,0])
+    # case where df already has missing rows filled with NaN
+    if decoded_states.size == len(df):
+        df[num_name] = decoded_states.flatten().astype("int")
+    elif np.sum(avail) == len(df):
+        df[num_name] = decoded_states[avail].astype("int")
+    else:
+        raise ValueError("Inconsistent shape.")
+
+    if code_book is not None:
+        df[loop_name] = df[num_name].map(code_book)

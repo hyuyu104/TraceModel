@@ -8,7 +8,8 @@ from scipy import stats
 from .update import (
     scaled_forward, 
     scaled_backward,
-    calculate_v
+    calculate_v,
+    log_viterbi
 ) # type: ignore
 
 class TraceModel:
@@ -239,24 +240,9 @@ class TraceModel:
                 break
 
     def _viterbi_(self, x:np.ndarray) -> np.ndarray:
-        v = np.zeros((len(x), self._S))
-        varg = np.zeros((len(x), self._S), dtype="int64")
-        states = np.arange(self._S)
-
-        v[0] = np.log(self.density(states, x[0])) + np.log(self._mu)
-        for t in range(1, len(x)):
-            den = self.density(states, x[t])
-            logP = np.where(self._P==0, -np.inf, np.log(np.where(self._P==0, 1, self._P)))
-            val = v[t-1][:,None] + logP + np.log(den[None,:])
-            v[t] = np.max(val, axis=0)
-            varg[t-1] = np.argmax(val, axis=0)
-            if any(np.abs(v[t]) < 1e-10):
-                raise ValueError(f"{t} iter failed: {v[t].round(3)}")
-
-        decoded_states = deque([np.argmax(v[-1])])
-        for t in range(len(x)-2, -1, -1):
-            decoded_states.appendleft(varg[t, decoded_states[0]])
-        return np.array(decoded_states)
+        den = self.density(np.arange(self._S), x)
+        decoded_states = log_viterbi(den, self._mu, self._P, len(x), self.S)
+        return decoded_states
     
     def decode(self, X:np.ndarray=None) -> np.ndarray:
         """Predict the looping status of the input data using the fitted 
