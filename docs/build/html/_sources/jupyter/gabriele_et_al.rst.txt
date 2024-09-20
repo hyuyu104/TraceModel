@@ -231,212 +231,64 @@ decoded states:
 
 --------------
 
-Analysis of C65 - the control group
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Read in data
-^^^^^^^^^^^^
-
-Please replace the ``data_dire`` with the relative path of the data
-stored on your machine.
+Fit with localization errors
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: ipython3
 
-    control_path = os.path.join(data_dire, "C36.tagged_set.tsv")
-    data = pd.read_csv(control_path, sep="\t")
-    print(f"{control_path.split("/")[-1]} has {len(pd.unique(data.id))} trajectories")
-    data.head()
-
-Reformat the data from long to wide via pivot then fit the model. Here
-we assume there are three states: looped state, intermediate state, and
-unlooped state, denoted by 0, 1, and 2, respectively.
-
-For the model, we assume the distance at each state follows a normal
-distribution with means and standard deviations (in µm) listed in
-``dist_params``.
-
-For the transition matrix, since we don’t want the chain jumps directly
-either from looped to unlooped or from unlooped to looped, initializing
-the corners of the matrix to 0 will ensure they are not updated during
-fitting.
-
-For the variance, we have the following relation:
-
-.. math::
-
-
-   \mathbb E[D^2] = \mathbb E[dx^2] + \mathbb E[dy^2] + \mathbb E[dz^2]
-
-Therefore, squaring the expected distance and dividing it by three will
-give a reasonable initial guess.
-
-.. code:: ipython3
-
-    0.2**2/3
-
-.. code:: ipython3
-
-    for c in ["x", "y", "z"]:
-        data[f"d{c}"] = data[f"{c}"] - data[f"{c}2"]
-    val_cols = ["dx", "dy", "dz"]
-    X = long_to_tensor(data, t_col="t", id_col="id", val_cols=val_cols)
-
-.. code:: ipython3
-
-    dist_params = (
-            {"cov":np.diag(np.ones(3)*0.015)},
-            {"cov":np.diag(np.ones(3)*0.05)},
-            {"cov":np.diag(np.ones(3)*0.0727)}
-    )
-    # add localization errors to the distributions
-    errs = [0.06, 0.06, 0.12]
-    for c, e in zip(dist_params, errs):
-        c["err"] = np.diag(np.ones(3)*2*e**2)
-    tm3 = trm.TraceModel(
-        X=X, Pm=np.array([
+    exp_dist = np.array([0.15, 0.4, 0.6])
+    var_ls = exp_dist**2/3
+    dist_params = tuple([{"cov":np.identity(3)*var_ls[i]} for i in range(3)])
+    tm = trm.TraceModel(
+        X=X36, Pm=np.array([
             [-1, -1,  0],
             [-1, -1, -1],
             [ 0, -1, -1]
         ]),
         dist_params=dist_params,
         dist_type=trm.multivariate_normal,
-        # update_dist_params=["err"]
+        update_dist_params=["err"]
     )
-    tm3.fit(max_iter=600)
+    tm.fit(600)
+
+
+.. parsed-literal::
+
+    Converged at iteration 64
+
 
 .. code:: ipython3
 
-    dist_params
+    tm.loc_err
 
-There is a ``convergence`` attribute for ``TraceModel``, which records
-the mean absolute difference of the transition matrix between two
-consecutive iterations. We can plot this difference to see the
-convergence of the model.
 
-.. code:: ipython3
 
-    fig, axes = plt.subplots(1, 2, figsize=(12, 4))
-    sns.scatterplot(tm3.convergence, ax=axes[0])
-    axes[0].set(
-        xlabel="Iteration number", ylabel="Mean absolute difference",
-        title="Transition matrix by iteration", ylim=(0, 0.01)
-    )
-    sns.scatterplot(tm3.lklhd, ax=axes[1])
-    axes[1].set(
-        xlabel="Iteration number", ylabel="Log likelihood",
-        title="Log likelihood by iteration"
-    )
-    plt.show()
+
+.. parsed-literal::
+
+    array([0.        , 0.        , 0.10753339])
+
+
 
 .. code:: ipython3
 
-    tm3.loc_err
+    fig = tplt.plot_transition_matrix(tm.P)
 
-Plot the fitted transition matrix
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-We can see that the corner elements are indeed fixed and are not
-updated. Moreover, the stationary distribution shows that in the long
-run, the trace only spends 4.5% of its time in the looped state. This
-coincides with the experiment design as C65 is the control group.
+
+.. image:: gabriele_et_al_files/gabriele_et_al_26_0.png
+
 
 .. code:: ipython3
 
-    fig = tplt.plot_transition_matrix(tm3.P)
+    counts = np.unique(tm.decode(), return_counts=True)[1]
+    print(f"C36 Loop fraction: {np.round(counts[0]/sum(counts), 4)*100}%")
+    counts = np.unique(tm.decode(X65), return_counts=True)[1]
+    print(f"C65 Loop fraction: {np.round(counts[0]/sum(counts), 4)*100}%")
 
-.. code:: ipython3
 
-    from collections import Counter
-    pred = tm3.decode()
-    Counter(pred[~np.isnan(X[:,:,0])])
+.. parsed-literal::
 
-Plot some sample trajectories
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. code:: ipython3
-
-    # some trace IDs in the data
-    pd.unique(data.id)[:10]
-
-Note the decode method only accepts two-dimensional numpy array, with
-each row being one trace.
-
-.. code:: ipython3
-
-    code_book = {0:"looped", 1:"intermediate", 2:"unlooped"}
-    df = data[data.id==0].copy()
-    t_range = np.arange(1, 366, 1, dtype="int")
-    df = df.set_index("t").reindex(t_range).reset_index()
-    df["state"] = tm3.decode(df[val_cols].values[None,:])[0]
-    fig, ax = tplt.plot_trace(df, "t", "dist", "state", code_book)
-    ax.set(ylim=(0,1))
-    plt.show()
-
-.. code:: ipython3
-
-    df = data[data.id==2].copy()
-    t_range = np.arange(1, 366, 1, dtype="int")
-    df = df.set_index("t").reindex(t_range).reset_index()
-    df["state"] = tm3.decode(df[val_cols].values[None,:])[0]
-    fig, ax = tplt.plot_trace(df, "t", "dist", "state", code_book)
-    ax.set(ylim=(0,1))
-    plt.show()
-
-Analysis of C36 - the experiment group
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Here we just repeat the same analysis for C65 and see if there are any
-difference.
-
-.. code:: ipython3
-
-    experiment_path = os.path.join(data_dire, "C36.tagged_set.tsv")
-    data = pd.read_csv(experiment_path, sep="\t")
-    print(f"{experiment_path.split("/")[-1]} has {len(pd.unique(data.id))} trajectories")
-    data.head()
-
-.. code:: ipython3
-
-    many_available_ids = data.groupby("id").count().sort_values("t").index[-150:]
-    sub_data = data[data.id.isin(many_available_ids.values)]
-    
-    pivoted = sub_data.pivot(index="t", columns="id", values="dist")
-    X = pivoted.values.T
-    dist_params = (
-        {"loc":0.15, "scale":0.1},
-        {"loc":0.3, "scale":0.2},
-        {"loc":0.45, "scale":0.1}
-    )
-    P = np.array([
-        [-1, -1,  0],
-        [-1, -1, -1],
-        [ 0, -1, -1]
-    ])
-    tme = TraceModel(X=X, Pm=P, dist_params=dist_params)
-    tme.fit(max_iter=200)
-
-.. code:: ipython3
-
-    fig, ax = plt.subplots(figsize=(8, 3))
-    sns.scatterplot(tme.convergence, ax=ax)
-    ax.set(
-        xlabel="# of iteration",
-        ylabel="Mean absolute difference",
-        title="Difference between each iteration"
-    )
-    plt.show()
-
-.. code:: ipython3
-
-    fig = tplt.plot_transition_matrix(tme.P)
-
-.. code:: ipython3
-
-    pd.unique(sub_data.id)[10:20]
-
-.. code:: ipython3
-
-    df = sub_data[sub_data.id==34].copy()
-    df["state"] = tme.decode(df["dist"].values[None,:])[0]
-    fig, ax = tplt.plot_trace(df, "t", "dist", "state", code_book)
+    C36 Loop fraction: 8.27%
+    C65 Loop fraction: 4.19%
 

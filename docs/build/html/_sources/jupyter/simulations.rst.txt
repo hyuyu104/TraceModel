@@ -3,10 +3,8 @@ Demo: simulate a live cell imaging dataset
 
 .. code:: ipython3
 
-    import os
     import pandas as pd
     import numpy as np
-    from scipy import stats
     import seaborn as sns
     from matplotlib import pyplot as plt
     import traceHMM.model as trm
@@ -49,7 +47,7 @@ length 500.
         [   0, 0.05, 0.95]
     ])
     # measurement errors added to x, y, and z axes
-    err = np.diag(np.square([0.06, 0.06, .12])*2)
+    err = np.diag(np.square([0, 0.06, .12])*2)
     # variance at each state
     dist_params = (
             {"cov":np.diag(np.ones(3)*0.015), "err":err},
@@ -94,15 +92,15 @@ the correct variance at each state.
         dist_type=trm.multivariate_normal, 
         update_dist_params=["err"]
     )
-    tm.fit(600)
+    tm.fit(int(1e3))
 
 
 .. parsed-literal::
 
-    Converged at iteration 504
+    Converged at iteration 653
 
 
-The model converges after 504 iterations. The ``TraceModel`` class uses
+The model converges after 653 iterations. The ``TraceModel`` class uses
 the mean absolute difference of the transition matrix between two
 iterations as the convergence criterion. The model also has a ``lklhd``
 attribute that records the log likelihood of the model at each
@@ -131,7 +129,7 @@ expectation-maximization process.
 
 
 The estimated measurement errors are listed below, which are close to
-``[0.06, 0.06, 0.12]`` as specified in the data generation part.
+``[0, 0.06, 0.12]`` as specified in the data generation part.
 
 .. code:: ipython3
 
@@ -142,7 +140,7 @@ The estimated measurement errors are listed below, which are close to
 
 .. parsed-literal::
 
-    array([0.05237644, 0.05454736, 0.11672494])
+    array([0.        , 0.06102365, 0.11988821])
 
 
 
@@ -236,12 +234,12 @@ error assumption:
         dist_params=dist_params, 
         dist_type=trm.multivariate_normal, 
     )
-    tm2.fit(600)
+    tm2.fit(int(1e3))
 
 
 .. parsed-literal::
 
-    Converged at iteration 224
+    Converged at iteration 214
 
 
 .. code:: ipython3
@@ -266,7 +264,7 @@ error assumption:
 
 The estimated transition matrix shows considerable difference from the
 true one. In addition, with this model, we would say the long run loop
-fraction is about 11% while the true fraction is twice the estimated
+fraction is about 12% while the true fraction is twice the estimated
 one.
 
 .. code:: ipython3

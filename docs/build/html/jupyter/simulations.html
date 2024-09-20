@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="API Reference" href="../api.html" /><link rel="prev" title="Loop state inference for Fbn2 TAD in mESCs" href="gabriele_et_al.html" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Development" href="../markdown/development.html" /><link rel="prev" title="Loop state inference for Fbn2 TAD in mESCs" href="gabriele_et_al.html" />
 
     <!-- Generated with Sphinx 8.0.2 and Furo 2024.08.06 -->
         <title>Demo: simulate a live cell imaging dataset - TraceModel 0.0 documentation</title>
@@ -207,6 +207,10 @@
 <li class="toctree-l1"><a class="reference internal" href="gabriele_et_al.html">Loop state inference for <em>Fbn2</em> TAD in mESCs</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Demo: simulate a live cell imaging dataset</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../markdown/development.html">Development</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../api.html">API Reference</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of API Reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -261,10 +265,8 @@
         <article role="main" id="furo-main-content">
           <section id="demo-simulate-a-live-cell-imaging-dataset">
 <h1>Demo: simulate a live cell imaging dataset<a class="headerlink" href="#demo-simulate-a-live-cell-imaging-dataset" title="Link to this heading">¶</a></h1>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">stats</span>
 <span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
 <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
 <span class="kn">import</span> <span class="nn">traceHMM.model</span> <span class="k">as</span> <span class="nn">trm</span>
@@ -301,7 +303,7 @@ length 500.</p>
     <span class="p">[</span>   <span class="mi">0</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">]</span>
 <span class="p">])</span>
 <span class="c1"># measurement errors added to x, y, and z axes</span>
-<span class="n">err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">([</span><span class="mf">0.06</span><span class="p">,</span> <span class="mf">0.06</span><span class="p">,</span> <span class="mf">.12</span><span class="p">])</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.06</span><span class="p">,</span> <span class="mf">.12</span><span class="p">])</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span>
 <span class="c1"># variance at each state</span>
 <span class="n">dist_params</span> <span class="o">=</span> <span class="p">(</span>
         <span class="p">{</span><span class="s2">&quot;cov&quot;</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="mf">0.015</span><span class="p">),</span> <span class="s2">&quot;err&quot;</span><span class="p">:</span><span class="n">err</span><span class="p">},</span>
@@ -341,13 +343,13 @@ the correct variance at each state.</p>
     <span class="n">dist_type</span><span class="o">=</span><span class="n">trm</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">,</span>
     <span class="n">update_dist_params</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;err&quot;</span><span class="p">]</span>
 <span class="p">)</span>
-<span class="n">tm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="mi">600</span><span class="p">)</span>
+<span class="n">tm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="mf">1e3</span><span class="p">))</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Converged</span> <span class="n">at</span> <span class="n">iteration</span> <span class="mi">504</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Converged</span> <span class="n">at</span> <span class="n">iteration</span> <span class="mi">653</span>
 </pre></div>
 </div>
-<p>The model converges after 504 iterations. The <code class="docutils literal notranslate"><span class="pre">TraceModel</span></code> class uses
+<p>The model converges after 653 iterations. The <code class="docutils literal notranslate"><span class="pre">TraceModel</span></code> class uses
 the mean absolute difference of the transition matrix between two
 iterations as the convergence criterion. The model also has a <code class="docutils literal notranslate"><span class="pre">lklhd</span></code>
 attribute that records the log likelihood of the model at each
@@ -370,11 +372,11 @@ expectation-maximization process.</p>
 </div>
 <img alt="../_images/simulations_8_0.png" src="../_images/simulations_8_0.png" />
 <p>The estimated measurement errors are listed below, which are close to
-<code class="docutils literal notranslate"><span class="pre">[0.06,</span> <span class="pre">0.06,</span> <span class="pre">0.12]</span></code> as specified in the data generation part.</p>
+<code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">0.06,</span> <span class="pre">0.12]</span></code> as specified in the data generation part.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tm</span><span class="o">.</span><span class="n">loc_err</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([</span><span class="mf">0.05237644</span><span class="p">,</span> <span class="mf">0.05454736</span><span class="p">,</span> <span class="mf">0.11672494</span><span class="p">])</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span>        <span class="p">,</span> <span class="mf">0.06102365</span><span class="p">,</span> <span class="mf">0.11988821</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>The estimated transition matrix is also close to the true transition
@@ -442,10 +444,10 @@ error assumption:</p>
     <span class="n">dist_params</span><span class="o">=</span><span class="n">dist_params</span><span class="p">,</span>
     <span class="n">dist_type</span><span class="o">=</span><span class="n">trm</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="n">tm2</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="mi">600</span><span class="p">)</span>
+<span class="n">tm2</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="mf">1e3</span><span class="p">))</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Converged</span> <span class="n">at</span> <span class="n">iteration</span> <span class="mi">224</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Converged</span> <span class="n">at</span> <span class="n">iteration</span> <span class="mi">214</span>
 </pre></div>
 </div>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
@@ -465,7 +467,7 @@ error assumption:</p>
 <img alt="../_images/simulations_18_0.png" src="../_images/simulations_18_0.png" />
 <p>The estimated transition matrix shows considerable difference from the
 true one. In addition, with this model, we would say the long run loop
-fraction is about 11% while the true fraction is twice the estimated
+fraction is about 12% while the true fraction is twice the estimated
 one.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sfigs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span><span class="o">.</span><span class="n">subfigures</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 <span class="n">tplt</span><span class="o">.</span><span class="n">plot_transition_matrix</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">sfigs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -502,12 +504,12 @@ one.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../api.html">
+          <a class="next-page" href="../markdown/development.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">API Reference</div>
+                <div class="title">Development</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>

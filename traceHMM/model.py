@@ -536,8 +536,8 @@ class multivariate_normal:
             A dictionary with the new measurement errors under the key `err`.
             The value is a list of measurement error matrix at each state.
         """
-        l_sqs = []
-        for d in range(tm._X.shape[-1]):
+        l_sqs = [0]
+        for d in range(1, tm._X.shape[-1]):
             a, b = 0, 0
             for s in range(tm.S):
                 s_sq = tm._dist_params[s]["cov"][d,d]
