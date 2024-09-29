@@ -134,8 +134,8 @@ py::array_t<double> log_viterbi(
     auto P = transmat.unchecked<2>(); // S x S
     auto mu = initdist.unchecked<1>(); // S
 
-    std::vector<std::vector<double>> v(T, std::vector<double>(S, 0.0));
-    std::vector<std::vector<int>> varg(T, std::vector<int>(S, 0));
+    vector<vector<double>> v(T, vector<double>(S, 0.0));
+    vector<vector<int>> varg(T, vector<int>(S, 0));
 
     py::array_t<int> states({T});
     auto s = states.mutable_unchecked<1>();

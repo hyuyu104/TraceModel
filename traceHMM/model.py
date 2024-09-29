@@ -226,7 +226,7 @@ class TraceModel:
             end if the mean absolute difference of transition matrix is below 
             this cutoff.
         """
-        for _ in range(max_iter):
+        for _ in range(int(max_iter)):
             self._forward_(self._X)
             self._lklhd.append(np.sum(np.log(self._alpha)))
             self._backward_(self._X)
@@ -544,6 +544,9 @@ class multivariate_normal:
                 a += np.nansum(tm._u[...,s]*(np.square(tm._X[...,d]) - s_sq))
                 b += np.sum(tm._u[...,s][~np.isnan(tm._X[...,0])])
             l_sqs.append(a/b)
-        L = np.diag(np.where(np.array(l_sqs) < 0, 0, l_sqs))
+        min_var = np.min([np.diag(t["cov"]) for t in tm._dist_params])
+        # trim to ensure covariance matrix is positive
+        L = np.diag(np.where(np.array(l_sqs) < -min_var, 0, l_sqs))
+        # L = np.diag(l_sqs)
         param = {"err":[L.copy() for _ in range(tm.S)]}
         return param

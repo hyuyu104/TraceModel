@@ -166,3 +166,35 @@ def add_predictions_to_df(
 
     if code_book is not None:
         df[loop_name] = df[num_name].map(code_book)
+        
+        
+def avg_loop_life_time(H:np.ndarray) -> float:
+    """Calculate the mean loop life time of (a) given sequence(s) of hidden 
+    states (not the observed values). Loop state is denoted by 0 in the input
+    sequence(s).
+
+    Parameters
+    ----------
+    H : (T) or (N, T) np.ndarray
+        A single sequence of hidden states or N sequences.
+
+    Returns
+    -------
+    float
+        The average loop life time of the sequence.
+    """
+    if len(H.shape) == 1:
+        H = [H]
+    loops = []
+    for h in H:
+        added = False
+        for t, val in enumerate(h):
+            if val == 0:
+                if added:
+                    loops[-1] += 1
+                else:
+                    loops.append(1)
+                    added = True
+            else:
+                added = False
+    return np.mean(loops)
