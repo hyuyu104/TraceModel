@@ -179,3 +179,12 @@ Fit with localization errors
     1B1 120min Loop fraction: 3.87%
 
 
+.. code:: ipython3
+
+    print(f"Average loop life time: {round(tm.avg_loop_life/2, 2)} min")
+
+
+.. parsed-literal::
+
+    Average loop life time: 17.43 min
+

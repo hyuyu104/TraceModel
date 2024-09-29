@@ -182,9 +182,9 @@ spends about 7% time in the looped state.
 .. code:: ipython3
 
     counts = np.unique(tm36.decode(), return_counts=True)[1]
-    print(f"C36 Loop fraction: {np.round(counts[0]/sum(counts), 4)*100}%")
+    print(f"C36 Loop fraction: {np.round(counts[0]/sum(counts)*100, 2)}%")
     counts = np.unique(tm36.decode(X65), return_counts=True)[1]
-    print(f"C65 Loop fraction: {np.round(counts[0]/sum(counts), 4)*100}%")
+    print(f"C65 Loop fraction: {np.round(counts[0]/sum(counts)*100, 2)}%")
 
 
 .. parsed-literal::
@@ -280,13 +280,23 @@ Fit with localization errors
 .. code:: ipython3
 
     counts = np.unique(tm.decode(), return_counts=True)[1]
-    print(f"C36 Loop fraction: {np.round(counts[0]/sum(counts), 4)*100}%")
+    print(f"C36 Loop fraction: {np.round(counts[0]/sum(counts)*100, 2)}%")
     counts = np.unique(tm.decode(X65), return_counts=True)[1]
-    print(f"C65 Loop fraction: {np.round(counts[0]/sum(counts), 4)*100}%")
+    print(f"C65 Loop fraction: {np.round(counts[0]/sum(counts)*100, 2)}%")
 
 
 .. parsed-literal::
 
-    C36 Loop fraction: 8.260000000000002%
+    C36 Loop fraction: 8.26%
     C65 Loop fraction: 4.19%
+
+
+.. code:: ipython3
+
+    print(f"Average loop life time: {round(tm.avg_loop_life/3, 2)} min")
+
+
+.. parsed-literal::
+
+    Average loop life time: 7.79 min
 

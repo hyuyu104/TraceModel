@@ -126,6 +126,11 @@ class TraceModel:
         update_dist_params contains "err".
         """
         return np.sqrt(np.diag(self._dist_params[0]["err"])/2)
+    
+    @property
+    def avg_loop_life(self) -> float:
+        """Return the expected loop life length (in number of time points)."""
+        return 1/self._P[0,1]
 
     def density(
             self, 
