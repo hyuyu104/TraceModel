@@ -269,8 +269,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
 <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
-<span class="kn">import</span> <span class="nn">traceHMM.model</span> <span class="k">as</span> <span class="nn">trm</span>
-<span class="kn">import</span> <span class="nn">traceHMM.utils.plot</span> <span class="k">as</span> <span class="nn">tplt</span>
+<span class="kn">import</span> <span class="nn">traceHMM</span>
 </pre></div>
 </div>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">reload_ext</span> autoreload
@@ -311,11 +310,11 @@ length 500.</p>
         <span class="p">{</span><span class="s2">&quot;cov&quot;</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="mf">0.085</span><span class="p">),</span> <span class="s2">&quot;err&quot;</span><span class="p">:</span><span class="n">err</span><span class="p">}</span>
 <span class="p">)</span>
 <span class="c1"># a uniform initial distribution over the 3 states</span>
-<span class="n">tse</span> <span class="o">=</span> <span class="n">trm</span><span class="o">.</span><span class="n">TraceSimulator</span><span class="p">(</span>
+<span class="n">tse</span> <span class="o">=</span> <span class="n">traceHMM</span><span class="o">.</span><span class="n">TraceSimulator</span><span class="p">(</span>
     <span class="n">P</span><span class="o">=</span><span class="n">P</span><span class="p">,</span>
     <span class="n">mu</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">]),</span>
     <span class="n">dist_params</span><span class="o">=</span><span class="n">dist_params</span><span class="p">,</span>
-    <span class="n">dist_type</span><span class="o">=</span><span class="n">trm</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">,</span>
+    <span class="n">dist_type</span><span class="o">=</span><span class="n">traceHMM</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">,</span>
     <span class="n">random_state</span><span class="o">=</span><span class="mi">100</span>
 <span class="p">)</span>
 <span class="n">H</span><span class="p">,</span> <span class="n">X0</span> <span class="o">=</span> <span class="n">tse</span><span class="o">.</span><span class="n">simulate_multiple_traces</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="mi">400</span><span class="p">)</span>
@@ -333,17 +332,17 @@ the correct variance at each state.</p>
         <span class="p">{</span><span class="s2">&quot;cov&quot;</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="mf">0.055</span><span class="p">)},</span>
         <span class="p">{</span><span class="s2">&quot;cov&quot;</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="mf">0.085</span><span class="p">)}</span>
 <span class="p">)</span>
-<span class="n">tm</span> <span class="o">=</span> <span class="n">trm</span><span class="o">.</span><span class="n">TraceModel</span><span class="p">(</span>
+<span class="n">tm</span> <span class="o">=</span> <span class="n">traceHMM</span><span class="o">.</span><span class="n">TraceModel</span><span class="p">(</span>
     <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">Pm</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
         <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>  <span class="mi">0</span><span class="p">],</span>
         <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span>
         <span class="p">[</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
     <span class="p">]),</span>
     <span class="n">dist_params</span><span class="o">=</span><span class="n">dist_params</span><span class="p">,</span>
-    <span class="n">dist_type</span><span class="o">=</span><span class="n">trm</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">,</span>
+    <span class="n">dist_type</span><span class="o">=</span><span class="n">traceHMM</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">,</span>
     <span class="n">update_dist_params</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;err&quot;</span><span class="p">]</span>
 <span class="p">)</span>
-<span class="n">tm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="mf">1e3</span><span class="p">))</span>
+<span class="n">tm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="mf">1e3</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Converged</span> <span class="n">at</span> <span class="n">iteration</span> <span class="mi">653</span>
@@ -383,9 +382,9 @@ expectation-maximization process.</p>
 matrix, and both give a similar stationary distribution, showing that
 the chain spends about 22% of time in the looped state in the long run.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sfigs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span><span class="o">.</span><span class="n">subfigures</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-<span class="n">tplt</span><span class="o">.</span><span class="n">plot_transition_matrix</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">sfigs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">traceHMM</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_transition_matrix</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">sfigs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 <span class="n">sfigs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;True transition matrix&quot;</span><span class="p">)</span>
-<span class="n">tplt</span><span class="o">.</span><span class="n">plot_transition_matrix</span><span class="p">(</span><span class="n">tm</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">sfigs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">traceHMM</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_transition_matrix</span><span class="p">(</span><span class="n">tm</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">sfigs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 <span class="n">sfigs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;Estimated transition matrix&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -401,8 +400,8 @@ the chain spends about 22% of time in the looped state in the long run.</p>
 <span class="n">df</span><span class="p">[</span><span class="s2">&quot;true&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">H</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
 <span class="n">code_book</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span><span class="s2">&quot;looped&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="s2">&quot;intermediate&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="s2">&quot;unlooped&quot;</span><span class="p">}</span>
 <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
-<span class="n">tplt</span><span class="o">.</span><span class="n">plot_trace</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="s2">&quot;dist&quot;</span><span class="p">,</span> <span class="s2">&quot;state&quot;</span><span class="p">,</span> <span class="n">code_book</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-<span class="n">tplt</span><span class="o">.</span><span class="n">plot_trace</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="s2">&quot;dist&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">,</span> <span class="n">code_book</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">traceHMM</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_trace</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="s2">&quot;dist&quot;</span><span class="p">,</span> <span class="s2">&quot;state&quot;</span><span class="p">,</span> <span class="n">code_book</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">traceHMM</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_trace</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="s2">&quot;dist&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">,</span> <span class="n">code_book</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Time (s)&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Spatial distance (µm)&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Predicted loop states&quot;</span><span class="p">)</span>
 <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Time (s)&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Spatial distance (µm)&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;True loop states&quot;</span><span class="p">)</span>
 <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
@@ -416,8 +415,8 @@ the chain spends about 22% of time in the looped state in the long run.</p>
 <span class="n">df</span><span class="p">[</span><span class="s2">&quot;true&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">H</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
 <span class="n">code_book</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span><span class="s2">&quot;looped&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="s2">&quot;intermediate&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="s2">&quot;unlooped&quot;</span><span class="p">}</span>
 <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
-<span class="n">tplt</span><span class="o">.</span><span class="n">plot_trace</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="s2">&quot;dist&quot;</span><span class="p">,</span> <span class="s2">&quot;state&quot;</span><span class="p">,</span> <span class="n">code_book</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-<span class="n">tplt</span><span class="o">.</span><span class="n">plot_trace</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="s2">&quot;dist&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">,</span> <span class="n">code_book</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">traceHMM</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_trace</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="s2">&quot;dist&quot;</span><span class="p">,</span> <span class="s2">&quot;state&quot;</span><span class="p">,</span> <span class="n">code_book</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">traceHMM</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_trace</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="s2">&quot;dist&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">,</span> <span class="n">code_book</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Time (s)&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Spatial distance (µm)&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Predicted loop states&quot;</span><span class="p">)</span>
 <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Time (s)&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Spatial distance (µm)&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;True loop states&quot;</span><span class="p">)</span>
 <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
@@ -435,14 +434,14 @@ error assumption:</p>
         <span class="p">{</span><span class="s2">&quot;cov&quot;</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="mf">0.055</span><span class="p">)},</span>
         <span class="p">{</span><span class="s2">&quot;cov&quot;</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="mf">0.085</span><span class="p">)}</span>
 <span class="p">)</span>
-<span class="n">tm2</span> <span class="o">=</span> <span class="n">trm</span><span class="o">.</span><span class="n">TraceModel</span><span class="p">(</span>
+<span class="n">tm2</span> <span class="o">=</span> <span class="n">traceHMM</span><span class="o">.</span><span class="n">TraceModel</span><span class="p">(</span>
     <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">Pm</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
         <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>  <span class="mi">0</span><span class="p">],</span>
         <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span>
         <span class="p">[</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
     <span class="p">]),</span>
     <span class="n">dist_params</span><span class="o">=</span><span class="n">dist_params</span><span class="p">,</span>
-    <span class="n">dist_type</span><span class="o">=</span><span class="n">trm</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">,</span>
+    <span class="n">dist_type</span><span class="o">=</span><span class="n">traceHMM</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">tm2</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="mf">1e3</span><span class="p">))</span>
 </pre></div>
@@ -470,9 +469,9 @@ true one. In addition, with this model, we would say the long run loop
 fraction is about 12% while the true fraction is twice the estimated
 one.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sfigs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span><span class="o">.</span><span class="n">subfigures</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-<span class="n">tplt</span><span class="o">.</span><span class="n">plot_transition_matrix</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">sfigs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">traceHMM</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_transition_matrix</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">sfigs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 <span class="n">sfigs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;True transition matrix&quot;</span><span class="p">)</span>
-<span class="n">tplt</span><span class="o">.</span><span class="n">plot_transition_matrix</span><span class="p">(</span><span class="n">tm2</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">sfigs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">traceHMM</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_transition_matrix</span><span class="p">(</span><span class="n">tm2</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">sfigs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 <span class="n">sfigs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;Estimated transition matrix&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -488,14 +487,63 @@ one.</p>
 <span class="n">df</span><span class="p">[</span><span class="s2">&quot;true&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">H</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
 <span class="n">code_book</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span><span class="s2">&quot;looped&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="s2">&quot;intermediate&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="s2">&quot;unlooped&quot;</span><span class="p">}</span>
 <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
-<span class="n">tplt</span><span class="o">.</span><span class="n">plot_trace</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="s2">&quot;dist&quot;</span><span class="p">,</span> <span class="s2">&quot;state&quot;</span><span class="p">,</span> <span class="n">code_book</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-<span class="n">tplt</span><span class="o">.</span><span class="n">plot_trace</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="s2">&quot;dist&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">,</span> <span class="n">code_book</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">traceHMM</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_trace</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="s2">&quot;dist&quot;</span><span class="p">,</span> <span class="s2">&quot;state&quot;</span><span class="p">,</span> <span class="n">code_book</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">traceHMM</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_trace</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="s2">&quot;dist&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">,</span> <span class="n">code_book</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Time (s)&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Spatial distance (µm)&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Predicted loop states&quot;</span><span class="p">)</span>
 <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Time (s)&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Spatial distance (µm)&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;True loop states&quot;</span><span class="p">)</span>
 <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 </pre></div>
 </div>
 <img alt="../_images/simulations_22_0.png" src="../_images/simulations_22_0.png" />
+</section>
+<section id="loop-life-time">
+<h2>Loop Life Time<a class="headerlink" href="#loop-life-time" title="Link to this heading">¶</a></h2>
+<p>Since the raw data contains missing values, it is difficult to calculate
+the loop life time. Given we have already fitted a traceHMM, there are
+two ways to estimate the average loop life time:</p>
+<ol class="arabic">
+<li><p>Monte Carlo approach: generate some samples according to the fitted
+transition matrix, and calculate the average loop life time of the
+sample.</p></li>
+<li><p>First-step analysis of Markov chain: the expected loop life time is
+the expection of the hitting time from loop state to intermediate
+state:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\mathbb E_0[\tau_1] = p_{11}(\mathbb E_0[\tau_1] + 1) + p_{12}(\mathbb E_1[\tau_1] + 1),\]</div>
+</div>
+<p>where <span class="math notranslate nohighlight">\(\mathbb E_i[\tau_j]\)</span> denotes the expectation of the
+hitting time from the <span class="math notranslate nohighlight">\(i\)</span> th state to the <span class="math notranslate nohighlight">\(j\)</span> th state.
+The solution is <span class="math notranslate nohighlight">\(1/p_{12}\)</span>. That is, the average loop life time
+is just the inverse of the <span class="math notranslate nohighlight">\(12\)</span> th entry of the transition
+matrix.</p>
+</li>
+</ol>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tts</span> <span class="o">=</span> <span class="n">traceHMM</span><span class="o">.</span><span class="n">TraceSimulator</span><span class="p">(</span><span class="n">tm</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span> <span class="n">dist_params</span><span class="p">,</span> <span class="n">traceHMM</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">Hm</span><span class="p">,</span> <span class="n">Xm</span> <span class="o">=</span> <span class="n">tts</span><span class="o">.</span><span class="n">simulate_single_trace</span><span class="p">(</span><span class="mi">1000000</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">traceHMM</span><span class="o">.</span><span class="n">func</span><span class="o">.</span><span class="n">avg_loop_life_time</span><span class="p">(</span><span class="n">Hm</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">19.761629412272374</span>
+</pre></div>
+</div>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="mi">1</span><span class="o">/</span><span class="n">tm</span><span class="o">.</span><span class="n">P</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">19.83321708434932</span>
+</pre></div>
+</div>
+<p>Indeed, they return nearly the same value. The true average loop life
+time is given below:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">traceHMM</span><span class="o">.</span><span class="n">func</span><span class="o">.</span><span class="n">avg_loop_life_time</span><span class="p">(</span><span class="n">H</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">19.68839966130398</span>
+</pre></div>
+</div>
+<p>which is very close to our estimates.</p>
 </section>
 </section>
 
@@ -557,6 +605,7 @@ one.</p>
 <li><a class="reference internal" href="#">Demo: simulate a live cell imaging dataset</a><ul>
 <li><a class="reference internal" href="#test-tracehmm-implementation-with-simulated-data">Test traceHMM implementation with simulated data</a></li>
 <li><a class="reference internal" href="#ignore-the-localization-error">Ignore the localization error</a></li>
+<li><a class="reference internal" href="#loop-life-time">Loop Life Time</a></li>
 </ul>
 </li>
 </ul>

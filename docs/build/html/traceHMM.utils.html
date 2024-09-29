@@ -298,6 +298,25 @@ of each state, by default “loop”.</p></li>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="traceHMM.utils.func.avg_loop_life_time">
+<span class="sig-prename descclassname"><span class="pre">traceHMM.utils.func.</span></span><span class="sig-name descname"><span class="pre">avg_loop_life_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">H</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></span></span><a class="headerlink" href="#traceHMM.utils.func.avg_loop_life_time" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the mean loop life time of (a) given sequence(s) of hidden
+states (not the observed values). Loop state is denoted by 0 in the input
+sequence(s).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>H</strong> – A single sequence of hidden states or N sequences.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The average loop life time of the sequence.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="traceHMM.utils.func.ffill">
 <span class="sig-prename descclassname"><span class="pre">traceHMM.utils.func.</span></span><span class="sig-name descname"><span class="pre">ffill</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tracj_id_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'ffill'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#traceHMM.utils.func.ffill" title="Link to this definition">¶</a></dt>
 <dd><p>Fill missing spatial distance with the immediate available value that
@@ -478,6 +497,7 @@ figure if None is passed.</p></li>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
 <li><a class="reference internal" href="#module-traceHMM.utils.func">traceHMM.utils.func module</a><ul>
 <li><a class="reference internal" href="#traceHMM.utils.func.add_predictions_to_df"><code class="docutils literal notranslate"><span class="pre">add_predictions_to_df()</span></code></a></li>
+<li><a class="reference internal" href="#traceHMM.utils.func.avg_loop_life_time"><code class="docutils literal notranslate"><span class="pre">avg_loop_life_time()</span></code></a></li>
 <li><a class="reference internal" href="#traceHMM.utils.func.ffill"><code class="docutils literal notranslate"><span class="pre">ffill()</span></code></a></li>
 <li><a class="reference internal" href="#traceHMM.utils.func.long_to_tensor"><code class="docutils literal notranslate"><span class="pre">long_to_tensor()</span></code></a></li>
 <li><a class="reference internal" href="#traceHMM.utils.func.stationary_dist"><code class="docutils literal notranslate"><span class="pre">stationary_dist()</span></code></a></li>

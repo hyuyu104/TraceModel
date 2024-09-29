@@ -17,9 +17,7 @@ strains.
     import pandas as pd
     from matplotlib import pyplot as plt
     import seaborn as sns
-    import traceHMM.model as trm
-    from traceHMM.utils import plot as tplt
-    from traceHMM.utils.func import long_to_tensor, add_predictions_to_df
+    import traceHMM
 
 .. code:: ipython3
 
@@ -102,9 +100,9 @@ Reshape the dataframe to a three dimensional numpy array.
 
 .. code:: ipython3
 
-    X36 = long_to_tensor(data36, t_col="t", id_col="id", val_cols=["dx", "dy", "dz"])
+    X36 = traceHMM.func.long_to_tensor(data36, t_col="t", id_col="id", val_cols=["dx", "dy", "dz"])
     print("Array shape for C36 (N, T, S):", X36.shape)
-    X65 = long_to_tensor(data65, t_col="t", id_col="id", val_cols=["dx", "dy", "dz"])
+    X65 = traceHMM.func.long_to_tensor(data65, t_col="t", id_col="id", val_cols=["dx", "dy", "dz"])
     print("Array shape for C65 (N, T, S):", X65.shape)
 
 
@@ -123,14 +121,14 @@ Reference).
 .. code:: ipython3
 
     dist_params = ({"cov":covs[0]}, {"cov":covs[1]}, {"cov":covs[2]})
-    tm36 = trm.TraceModel(
+    tm36 = traceHMM.TraceModel(
         X=X36, Pm=np.array([
             [-1, -1,  0],
             [-1, -1, -1],
             [ 0, -1, -1]
         ]),
         dist_params=dist_params,
-        dist_type=trm.multivariate_normal,
+        dist_type=traceHMM.model.multivariate_normal,
     )
     tm36.fit(max_iter=200)
 
@@ -171,7 +169,7 @@ distribution is shown below:
 
 .. code:: ipython3
 
-    fig = tplt.plot_transition_matrix(tm36.P)
+    fig = traceHMM.plot.plot_transition_matrix(tm36.P)
 
 
 
@@ -200,14 +198,14 @@ decoded states:
 
 .. code:: ipython3
 
-    add_predictions_to_df(data36, tm36.decode(), X=X36)
-    add_predictions_to_df(data65, tm36.decode(X65), X=X65)
+    traceHMM.func.add_predictions_to_df(data36, tm36.decode(), X=X36)
+    traceHMM.func.add_predictions_to_df(data65, tm36.decode(X65), X=X65)
 
 .. code:: ipython3
 
     code_book = {0:"looped", 1:"intermediate", 2:"unlooped"}
     df = data36[data36["id"]==22]
-    fig, ax = tplt.plot_trace(df, "t", "dist", "state", code_book)
+    fig, ax = traceHMM.plot.plot_trace(df, "t", "dist", "state", code_book)
     ax.set(ylim=(0, 1.5), xlabel="Time (s)", ylabel="Spatial distance (µm)", title="C36 Trace 22")
     plt.show()
 
@@ -220,7 +218,7 @@ decoded states:
 
     code_book = {0:"looped", 1:"intermediate", 2:"unlooped"}
     df = data65[data65["id"]==14]
-    fig, ax = tplt.plot_trace(df, "t", "dist", "state", code_book)
+    fig, ax = traceHMM.plot.plot_trace(df, "t", "dist", "state", code_book)
     ax.set(ylim=(0, 1.5), xlabel="Time (s)", ylabel="Spatial distance (µm)", title="C65 Trace 14")
     plt.show()
 
@@ -239,14 +237,14 @@ Fit with localization errors
     exp_dist = np.array([0.15, 0.4, 0.6])
     var_ls = exp_dist**2/3
     dist_params = tuple([{"cov":np.identity(3)*var_ls[i]} for i in range(3)])
-    tm = trm.TraceModel(
+    tm = traceHMM.TraceModel(
         X=X36, Pm=np.array([
             [-1, -1,  0],
             [-1, -1, -1],
             [ 0, -1, -1]
         ]),
         dist_params=dist_params,
-        dist_type=trm.multivariate_normal,
+        dist_type=traceHMM.model.multivariate_normal,
         update_dist_params=["err"]
     )
     tm.fit(600)
@@ -254,7 +252,7 @@ Fit with localization errors
 
 .. parsed-literal::
 
-    Converged at iteration 64
+    Converged at iteration 63
 
 
 .. code:: ipython3
@@ -266,13 +264,13 @@ Fit with localization errors
 
 .. parsed-literal::
 
-    array([0.        , 0.        , 0.10753339])
+    array([0.        , 0.        , 0.10753076])
 
 
 
 .. code:: ipython3
 
-    fig = tplt.plot_transition_matrix(tm.P)
+    fig = traceHMM.plot.plot_transition_matrix(tm.P)
 
 
 
@@ -289,6 +287,6 @@ Fit with localization errors
 
 .. parsed-literal::
 
-    C36 Loop fraction: 8.27%
+    C36 Loop fraction: 8.260000000000002%
     C65 Loop fraction: 4.19%
 

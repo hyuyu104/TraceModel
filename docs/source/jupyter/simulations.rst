@@ -7,8 +7,7 @@ Demo: simulate a live cell imaging dataset
     import numpy as np
     import seaborn as sns
     from matplotlib import pyplot as plt
-    import traceHMM.model as trm
-    import traceHMM.utils.plot as tplt
+    import traceHMM
 
 .. code:: ipython3
 
@@ -55,11 +54,11 @@ length 500.
             {"cov":np.diag(np.ones(3)*0.085), "err":err}
     )
     # a uniform initial distribution over the 3 states
-    tse = trm.TraceSimulator(
+    tse = traceHMM.TraceSimulator(
         P=P,
         mu=np.array([1/3, 1/3, 1/3]),
         dist_params=dist_params,
-        dist_type=trm.multivariate_normal,
+        dist_type=traceHMM.model.multivariate_normal,
         random_state=100
     )
     H, X0 = tse.simulate_multiple_traces(500, 400)
@@ -82,17 +81,17 @@ the correct variance at each state.
             {"cov":np.diag(np.ones(3)*0.055)},
             {"cov":np.diag(np.ones(3)*0.085)}
     )
-    tm = trm.TraceModel(
+    tm = traceHMM.TraceModel(
         X=X, Pm=np.array([
             [-1, -1,  0],
             [-1, -1, -1],
             [ 0, -1, -1]
         ]), 
         dist_params=dist_params, 
-        dist_type=trm.multivariate_normal, 
+        dist_type=traceHMM.model.multivariate_normal, 
         update_dist_params=["err"]
     )
-    tm.fit(int(1e3))
+    tm.fit(1e3)
 
 
 .. parsed-literal::
@@ -151,9 +150,9 @@ the chain spends about 22% of time in the looped state in the long run.
 .. code:: ipython3
 
     sfigs = plt.figure(figsize=(10, 4)).subfigures(1, 2)
-    tplt.plot_transition_matrix(P, sfigs[0])
+    traceHMM.plot.plot_transition_matrix(P, sfigs[0])
     sfigs[0].suptitle("True transition matrix")
-    tplt.plot_transition_matrix(tm.P, sfigs[1])
+    traceHMM.plot.plot_transition_matrix(tm.P, sfigs[1])
     sfigs[1].suptitle("Estimated transition matrix")
 
 
@@ -180,8 +179,8 @@ Below are some traces along with their predicted/true looping profile.
     df["true"] = H[n]
     code_book = {0:"looped", 1:"intermediate", 2:"unlooped"}
     fig, axes = plt.subplots(2, 1, figsize=(16, 6))
-    tplt.plot_trace(df, "t", "dist", "state", code_book, fig, axes[0])
-    tplt.plot_trace(df, "t", "dist", "true", code_book, fig, axes[1])
+    traceHMM.plot.plot_trace(df, "t", "dist", "state", code_book, fig, axes[0])
+    traceHMM.plot.plot_trace(df, "t", "dist", "true", code_book, fig, axes[1])
     axes[0].set(xlabel="Time (s)", ylabel="Spatial distance (µm)", title="Predicted loop states")
     axes[1].set(xlabel="Time (s)", ylabel="Spatial distance (µm)", title="True loop states")
     fig.tight_layout()
@@ -200,8 +199,8 @@ Below are some traces along with their predicted/true looping profile.
     df["true"] = H[n]
     code_book = {0:"looped", 1:"intermediate", 2:"unlooped"}
     fig, axes = plt.subplots(2, 1, figsize=(16, 6))
-    tplt.plot_trace(df, "t", "dist", "state", code_book, fig, axes[0])
-    tplt.plot_trace(df, "t", "dist", "true", code_book, fig, axes[1])
+    traceHMM.plot.plot_trace(df, "t", "dist", "state", code_book, fig, axes[0])
+    traceHMM.plot.plot_trace(df, "t", "dist", "true", code_book, fig, axes[1])
     axes[0].set(xlabel="Time (s)", ylabel="Spatial distance (µm)", title="Predicted loop states")
     axes[1].set(xlabel="Time (s)", ylabel="Spatial distance (µm)", title="True loop states")
     fig.tight_layout()
@@ -225,14 +224,14 @@ error assumption:
             {"cov":np.diag(np.ones(3)*0.055)},
             {"cov":np.diag(np.ones(3)*0.085)}
     )
-    tm2 = trm.TraceModel(
+    tm2 = traceHMM.TraceModel(
         X=X, Pm=np.array([
             [-1, -1,  0],
             [-1, -1, -1],
             [ 0, -1, -1]
         ]), 
         dist_params=dist_params, 
-        dist_type=trm.multivariate_normal, 
+        dist_type=traceHMM.model.multivariate_normal, 
     )
     tm2.fit(int(1e3))
 
@@ -270,9 +269,9 @@ one.
 .. code:: ipython3
 
     sfigs = plt.figure(figsize=(10, 4)).subfigures(1, 2)
-    tplt.plot_transition_matrix(P, sfigs[0])
+    traceHMM.plot.plot_transition_matrix(P, sfigs[0])
     sfigs[0].suptitle("True transition matrix")
-    tplt.plot_transition_matrix(tm2.P, sfigs[1])
+    traceHMM.plot.plot_transition_matrix(tm2.P, sfigs[1])
     sfigs[1].suptitle("Estimated transition matrix")
 
 
@@ -299,8 +298,8 @@ The estimated looping profile is also problematic, as shown below:
     df["true"] = H[n]
     code_book = {0:"looped", 1:"intermediate", 2:"unlooped"}
     fig, axes = plt.subplots(2, 1, figsize=(16, 6))
-    tplt.plot_trace(df, "t", "dist", "state", code_book, fig, axes[0])
-    tplt.plot_trace(df, "t", "dist", "true", code_book, fig, axes[1])
+    traceHMM.plot.plot_trace(df, "t", "dist", "state", code_book, fig, axes[0])
+    traceHMM.plot.plot_trace(df, "t", "dist", "true", code_book, fig, axes[1])
     axes[0].set(xlabel="Time (s)", ylabel="Spatial distance (µm)", title="Predicted loop states")
     axes[1].set(xlabel="Time (s)", ylabel="Spatial distance (µm)", title="True loop states")
     fig.tight_layout()
@@ -309,3 +308,79 @@ The estimated looping profile is also problematic, as shown below:
 
 .. image:: simulations_files/simulations_22_0.png
 
+
+Loop Life Time
+~~~~~~~~~~~~~~
+
+Since the raw data contains missing values, it is difficult to calculate
+the loop life time. Given we have already fitted a traceHMM, there are
+two ways to estimate the average loop life time:
+
+1. Monte Carlo approach: generate some samples according to the fitted
+   transition matrix, and calculate the average loop life time of the
+   sample.
+
+2. First-step analysis of Markov chain: the expected loop life time is
+   the expection of the hitting time from loop state to intermediate
+   state:
+
+   .. math::
+
+
+       \mathbb E_0[\tau_1] = p_{11}(\mathbb E_0[\tau_1] + 1) + p_{12}(\mathbb E_1[\tau_1] + 1),
+       
+
+   where :math:`\mathbb E_i[\tau_j]` denotes the expectation of the
+   hitting time from the :math:`i` th state to the :math:`j` th state.
+   The solution is :math:`1/p_{12}`. That is, the average loop life time
+   is just the inverse of the :math:`12` th entry of the transition
+   matrix.
+
+.. code:: ipython3
+
+    tts = traceHMM.TraceSimulator(tm.P, np.ones(3)/3, dist_params, traceHMM.model.multivariate_normal, 0)
+    Hm, Xm = tts.simulate_single_trace(1000000)
+
+.. code:: ipython3
+
+    traceHMM.func.avg_loop_life_time(Hm)
+
+
+
+
+.. parsed-literal::
+
+    19.761629412272374
+
+
+
+.. code:: ipython3
+
+    1/tm.P[0,1]
+
+
+
+
+.. parsed-literal::
+
+    19.83321708434932
+
+
+
+Indeed, they return nearly the same value. The true average loop life
+time is given below:
+
+.. code:: ipython3
+
+    traceHMM.func.avg_loop_life_time(H)
+
+
+
+
+.. parsed-literal::
+
+    19.68839966130398
+
+
+
+which is very close to our estimates.
