@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Development" href="../markdown/development.html" /><link rel="prev" title="Loop state inference for Fbn2 TAD in mESCs" href="gabriele_et_al.html" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Development" href="../markdown/development.html" /><link rel="prev" title="Loop state inference for TetO array insertion in mESCs" href="mach_et_al.html" />
 
     <!-- Generated with Sphinx 8.0.2 and Furo 2024.08.06 -->
         <title>Demo: simulate a live cell imaging dataset - TraceModel 0.0 documentation</title>
@@ -205,6 +205,7 @@
 <p class="caption" role="heading"><span class="caption-text">Jupyter Notebooks</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="gabriele_et_al.html">Loop state inference for <em>Fbn2</em> TAD in mESCs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mach_et_al.html">Loop state inference for TetO array insertion in mESCs</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Demo: simulate a live cell imaging dataset</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
@@ -545,6 +546,65 @@ time is given below:</p>
 </div>
 <p>which is very close to our estimates.</p>
 </section>
+<section id="polychrom-simulations">
+<h2>Polychrom simulations<a class="headerlink" href="#polychrom-simulations" title="Link to this heading">¶</a></h2>
+<p>A single chain consisting of 1000 monomers over 10,000 time points.
+Bidirectional CTCF sites at the 200, 400, 600, and 800 monomer.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">h5py</span><span class="o">,</span> <span class="nn">re</span>
+<span class="n">poly_path</span> <span class="o">=</span> <span class="s2">&quot;../../hackathon/LE_1&quot;</span>
+<span class="n">paths</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">poly_path</span><span class="p">):</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^blocks_(\d+)-\d+\.h5&quot;</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">bool</span><span class="p">(</span><span class="n">res</span><span class="p">):</span>
+        <span class="n">paths</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">poly_path</span><span class="p">,</span> <span class="n">p</span><span class="p">),</span> <span class="n">res</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+<span class="n">paths</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+</pre></div>
+</div>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">arrs</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
+    <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">arrs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="s2">&quot;pos&quot;</span><span class="p">][()])</span>
+<span class="n">arrs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">arrs</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ll</span><span class="p">,</span> <span class="n">lr</span> <span class="o">=</span> <span class="mi">400</span><span class="p">,</span> <span class="mi">600</span>
+<span class="n">Xs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">arrs</span><span class="p">[</span><span class="n">ll</span><span class="p">]</span> <span class="o">-</span> <span class="n">arrs</span><span class="p">[</span><span class="n">lr</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">poly_path</span><span class="p">,</span> <span class="s2">&quot;LEFPos.h5&quot;</span><span class="p">))</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">bond_pos</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;positions&quot;</span><span class="p">][()]</span>
+<span class="n">bond_pos</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="mi">10000</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># all bonds are ordered: 1st pos &lt; 2nd pos</span>
+<span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">bond_pos</span><span class="p">[:,:,</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">bond_pos</span><span class="p">[:,:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kc">True</span>
+</pre></div>
+</div>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># define loop if the bond is within lcut from the CTCF sites</span>
+<span class="n">lcut</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">ll_filter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">bond_pos</span><span class="p">[:,:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">ll</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">lcut</span>
+<span class="n">lr_filter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">bond_pos</span><span class="p">[:,:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">lr</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">lcut</span>
+<span class="n">loop_states</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">ll_filter</span> <span class="o">&amp;</span> <span class="n">lr_filter</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;loop&quot;</span><span class="p">:</span><span class="n">loop_states</span><span class="p">,</span> <span class="s2">&quot;dist&quot;</span><span class="p">:</span><span class="n">Xs</span><span class="p">})</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">names</span><span class="o">=</span><span class="s2">&quot;t&quot;</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">scatterplot</span><span class="p">(</span><span class="n">plot_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">2000</span><span class="p">:</span><span class="mi">3000</span><span class="p">],</span> <span class="n">x</span><span class="o">=</span><span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;dist&quot;</span><span class="p">,</span> <span class="n">hue</span><span class="o">=</span><span class="s2">&quot;loop&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">Axes</span><span class="p">:</span> <span class="n">xlabel</span><span class="o">=</span><span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s1">&#39;dist&#39;</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<img alt="../_images/simulations_37_1.png" src="../_images/simulations_37_1.png" />
+</section>
 </section>
 
         </article>
@@ -561,14 +621,14 @@ time is given below:</p>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="gabriele_et_al.html">
+          <a class="prev-page" href="mach_et_al.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Loop state inference for <em>Fbn2</em> TAD in mESCs</div>
+                <div class="title">Loop state inference for TetO array insertion in mESCs</div>
                 
               </div>
             </a>
@@ -606,6 +666,7 @@ time is given below:</p>
 <li><a class="reference internal" href="#test-tracehmm-implementation-with-simulated-data">Test traceHMM implementation with simulated data</a></li>
 <li><a class="reference internal" href="#ignore-the-localization-error">Ignore the localization error</a></li>
 <li><a class="reference internal" href="#loop-life-time">Loop Life Time</a></li>
+<li><a class="reference internal" href="#polychrom-simulations">Polychrom simulations</a></li>
 </ul>
 </li>
 </ul>

@@ -384,3 +384,91 @@ time is given below:
 
 
 which is very close to our estimates.
+
+Polychrom simulations
+~~~~~~~~~~~~~~~~~~~~~
+
+A single chain consisting of 1000 monomers over 10,000 time points.
+Bidirectional CTCF sites at the 200, 400, 600, and 800 monomer.
+
+.. code:: ipython3
+
+    import os, h5py, re
+    poly_path = "../../hackathon/LE_1"
+    paths = []
+    for p in os.listdir(poly_path):
+        res = re.search(r"^blocks_(\d+)-\d+\.h5", p)
+        if bool(res):
+            paths.append((os.path.join(poly_path, p), res[1]))
+    paths = sorted(paths, key=lambda x: int(x[1]))
+
+.. code:: ipython3
+
+    arrs = []
+    for p in paths:
+        with h5py.File(p[0]) as f:
+            for k in f.keys():
+                arrs.append(f[k]["pos"][()])
+    arrs = np.stack(arrs).transpose(1, 0, 2)
+
+.. code:: ipython3
+
+    ll, lr = 400, 600
+    Xs = np.sqrt(np.sum(np.square(arrs[ll] - arrs[lr]), axis=-1))
+
+.. code:: ipython3
+
+    with h5py.File(os.path.join(poly_path, "LEFPos.h5")) as f:
+        bond_pos = f["positions"][()]
+    bond_pos.shape
+
+
+
+
+.. parsed-literal::
+
+    (10000, 4, 2)
+
+
+
+.. code:: ipython3
+
+    # all bonds are ordered: 1st pos < 2nd pos
+    np.all(bond_pos[:,:,0]-bond_pos[:,:,1] <= 0)
+
+
+
+
+.. parsed-literal::
+
+    True
+
+
+
+.. code:: ipython3
+
+    # define loop if the bond is within lcut from the CTCF sites
+    lcut = 20
+    ll_filter = np.abs(bond_pos[:,:,0] - ll) < lcut
+    lr_filter = np.abs(bond_pos[:,:,1] - lr) < lcut
+    loop_states = np.any(ll_filter & lr_filter, axis=1)
+
+.. code:: ipython3
+
+    plot_df = pd.DataFrame({"loop":loop_states, "dist":Xs}).reset_index(names="t")
+    
+    fig, ax = plt.subplots(figsize=(16, 4))
+    sns.scatterplot(plot_df.iloc[2000:3000], x="t", y="dist", hue="loop")
+
+
+
+
+.. parsed-literal::
+
+    <Axes: xlabel='t', ylabel='dist'>
+
+
+
+
+.. image:: simulations_files/simulations_37_1.png
+

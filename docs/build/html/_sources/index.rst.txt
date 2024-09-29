@@ -11,6 +11,7 @@ Inference of chromatin loop status from live cell imaging data
    :maxdepth: 2
 
    jupyter/gabriele_et_al
+   jupyter/mach_et_al
    jupyter/simulations
 
 
